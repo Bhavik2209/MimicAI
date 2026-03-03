@@ -1,0 +1,623 @@
+"use client"
+
+import { useState, useRef, useEffect } from "react"
+import { Plus, ArrowUp, Menu, ChevronDown, ChevronUp } from "lucide-react"
+
+const TYPEWRITER_MS_PER_CHAR = 18
+
+interface ChatMessage {
+  id: string
+  type: "user" | "persona"
+  text: string
+  timestamp: string
+  sources?: string[]
+}
+
+const initialMessages: ChatMessage[] = [
+  {
+    id: "1",
+    type: "persona",
+    text: "I am prepared to discuss my work in electrical engineering, wireless energy transmission, and the principles that guided my research. My laboratory notebooks are open to you. What subject do you wish to examine?",
+    timestamp: "14:32",
+    sources: ["Tesla, N. 'My Inventions' (1919)", "Carlson, W.B. 'Tesla: Inventor of the Electrical Age'"],
+  },
+]
+
+const sessions = [
+  { id: "1", topic: "Alternating current and the polyphase system", date: "Feb 27, 2026", active: true },
+  { id: "2", topic: "Wardenclyffe Tower and wireless energy", date: "Feb 25, 2026", active: false },
+  { id: "3", topic: "Relationship with Edison and Westinghouse", date: "Feb 22, 2026", active: false },
+]
+
+const personaResponses: Record<string, { text: string; sources: string[] }> = {
+  default: {
+    text: "An excellent question. Allow me to address this with the precision it deserves.\n\nMy work was always guided by one principle: that the forces of nature, properly understood and harnessed, could liberate humanity from drudgery. When I conceived the rotating magnetic field in 1882, walking through the City Park of Budapest, it came to me complete — the motor, the generator, the entire system of alternating current power transmission. I did not build toward it incrementally. I saw it whole.\n\n**The polyphase alternating current system** was not merely an improvement upon Edison's direct current. It was a fundamentally different conception of how electrical energy should flow through civilization. Direct current is a river. Alternating current is the tide — rhythmic, transformable, capable of traversing vast distances without significant loss.\n\nThis distinction was not immediately obvious to my contemporaries. Edison, a brilliant man in many respects, could not see past the paradigm he had built. This is the great tragedy of invested genius: it becomes anchored to its own success.",
+    sources: ["Tesla, N. 'My Inventions' (1919)", "Seifer, M. 'Wizard: The Life and Times of Nikola Tesla'"],
+  },
+}
+
+interface PersonaChatProps {
+  onBack?: () => void
+}
+
+export function PersonaChatTab({ onBack }: PersonaChatProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
+  const [input, setInput] = useState("")
+  const [activeMode, setActiveMode] = useState<"historical" | "interpretive">("historical")
+  const [activeSession, setActiveSession] = useState("1")
+  const [showMobileSessions, setShowMobileSessions] = useState(false)
+  const [expandedSources, setExpandedSources] = useState<Record<string, boolean>>({})
+  const [disclaimerExpanded, setDisclaimerExpanded] = useState(false)
+  const [typewriterLen, setTypewriterLen] = useState<Record<string, number>>({})
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  // Typewriter: when a new persona message appears, animate its length from 0 to full
+  const lastPersonaId = messages.filter((m) => m.type === "persona").slice(-1)[0]?.id
+  const typedIdsRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    if (!lastPersonaId) return
+    if (typedIdsRef.current.has(lastPersonaId)) return
+    const msg = messages.find((m) => m.id === lastPersonaId)
+    if (!msg || msg.type !== "persona") return
+    const fullLen = msg.text.length
+    let n = 0
+    const id = setInterval(() => {
+      n += 1
+      setTypewriterLen((prev) => ({ ...prev, [lastPersonaId]: Math.min(n, fullLen) }))
+      if (n >= fullLen) {
+        typedIdsRef.current.add(lastPersonaId)
+        clearInterval(id)
+      }
+    }, TYPEWRITER_MS_PER_CHAR)
+    return () => clearInterval(id)
+  }, [lastPersonaId, messages])
+
+  const handleSend = () => {
+    if (!input.trim()) return
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      type: "user",
+      text: input.trim(),
+      timestamp: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
+    }
+    setMessages((prev) => [...prev, userMsg])
+    setInput("")
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "44px"
+    }
+
+    setTimeout(() => {
+      const resp = personaResponses.default
+      const personaMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: "persona",
+        text: resp.text,
+        timestamp: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
+        sources: resp.sources,
+      }
+      setMessages((prev) => [...prev, personaMsg])
+    }, 800)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value)
+    const ta = e.target
+    ta.style.height = "44px"
+    ta.style.height = Math.min(ta.scrollHeight, 140) + "px"
+  }
+
+  const renderMessageText = (text: string, compact = false) => {
+    const fontSize = compact ? 13 : 15
+    const marginTop = compact ? 8 : 14
+    return text.split("\n\n").map((para, i) => {
+      const processed = para.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight:600;color:var(--text-1)">$1</strong>')
+      return (
+        <p
+          key={i}
+          className="font-sans"
+          style={{
+            fontSize,
+            color: "var(--text-2)",
+            lineHeight: 1.6,
+            marginTop: i > 0 ? marginTop : 0,
+          }}
+          dangerouslySetInnerHTML={{ __html: processed }}
+        />
+      )
+    })
+  }
+
+  return (
+    <div
+      className="flex dashboard-page"
+      style={{
+        width: "100%",
+        height: "calc(100vh - var(--topbar-h))",
+        overflow: "hidden",
+      }}
+    >
+      {showMobileSessions && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 min-[1200px]:hidden backdrop-blur-sm"
+          style={{ top: "var(--topbar-h)" }}
+          onClick={() => setShowMobileSessions(false)}
+        />
+      )}
+
+      {/* Sessions Sidebar — cleaner, less dense */}
+      <div
+        className={`flex flex-col shrink-0 transition-transform duration-200 ease-out z-40 ${showMobileSessions
+          ? "max-[1200px]:fixed max-[1200px]:left-0 max-[1200px]:top-[var(--topbar-h)] max-[1200px]:bottom-0 max-[1200px]:translate-x-0 max-[1200px]:shadow-2xl"
+          : "max-[1200px]:fixed max-[1200px]:left-0 max-[1200px]:top-[var(--topbar-h)] max-[1200px]:bottom-0 max-[1200px]:-translate-x-full"
+          }`}
+        style={{
+          width: 260,
+          background: "var(--panel-bg)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderRight: "1px solid var(--panel-border)",
+        }}
+      >
+        <div
+          className="flex items-center justify-between shrink-0"
+          style={{ padding: "16px 18px" }}
+        >
+          <span
+            className="font-mono"
+            style={{
+              fontSize: 10,
+              color: "var(--text-3)",
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+            }}
+          >
+            Sessions
+          </span>
+          <button
+            className="flex items-center justify-center rounded-lg transition-colors"
+            style={{
+              width: 28,
+              height: 28,
+              background: "var(--gold-dim)",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--gold)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--gold)"
+              e.currentTarget.style.color = "var(--primary-foreground)"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "var(--gold-dim)"
+              e.currentTarget.style.color = "var(--gold)"
+            }}
+            aria-label="New session"
+          >
+            <Plus size={14} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto" style={{ padding: "0 12px 16px" }}>
+          {sessions.map((session) => {
+            const isActive = activeSession === session.id
+            return (
+              <button
+                key={session.id}
+                onClick={() => setActiveSession(session.id)}
+                className="w-full text-left rounded-lg transition-all"
+                style={{
+                  padding: "12px 14px",
+                  cursor: "pointer",
+                  background: isActive ? "var(--gold-dim)" : "transparent",
+                  border: "none",
+                  marginBottom: 4,
+                  transition: "var(--transition)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) e.currentTarget.style.background = "var(--surface-2)"
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) e.currentTarget.style.background = "transparent"
+                }}
+              >
+                <div
+                  className="font-sans"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: isActive ? 500 : 400,
+                    color: isActive ? "var(--text-1)" : "var(--text-2)",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {session.topic}
+                </div>
+                <div
+                  className="font-mono"
+                  style={{ fontSize: 11, color: "var(--text-3)", marginTop: 6 }}
+                >
+                  {session.date}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Conversation Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Compact Persona Header — single row, less vertical space */}
+        <div
+          className="flex items-center justify-between shrink-0"
+          style={{
+            minHeight: 56,
+            background: "var(--panel-bg)",
+            borderBottom: "1px solid var(--panel-border)",
+            padding: "0 24px",
+          }}
+        >
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowMobileSessions(true)}
+              className="min-[1200px]:hidden flex items-center justify-center rounded-lg -ml-1"
+              style={{
+                width: 36,
+                height: 36,
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--text-2)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--control-bg)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
+              <Menu size={18} />
+            </button>
+
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="font-sans flex items-center gap-1.5"
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: "var(--text-3)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "color var(--transition)",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--gold)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-3)")}
+              >
+                ← Back to profile
+              </button>
+            )}
+
+            {onBack && <div style={{ width: 1, height: 20, background: "var(--border-soft)" }} />}
+
+            <div className="flex items-center gap-3">
+              <div
+                className="flex items-center justify-center rounded-full font-serif"
+                style={{
+                  width: 32,
+                  height: 32,
+                  background: "var(--gold-dim)",
+                  color: "var(--gold)",
+                  fontSize: 13,
+                  fontStyle: "italic",
+                }}
+              >
+                NT
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="font-sans"
+                  style={{ fontSize: 15, fontWeight: 600, color: "var(--text-1)" }}
+                >
+                  Nikola Tesla
+                </span>
+                <span
+                  className="font-mono"
+                  style={{
+                    fontSize: 10,
+                    color: "var(--text-3)",
+                    border: "1px solid var(--border-soft)",
+                    padding: "2px 8px",
+                    borderRadius: 4,
+                  }}
+                >
+                  Persona
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-0.5">
+            {(["historical", "interpretive"] as const).map((mode) => {
+              const isActive = activeMode === mode
+              return (
+                <button
+                  key={mode}
+                  onClick={() => setActiveMode(mode)}
+                  className="font-sans capitalize rounded-lg px-4 py-2 transition-all"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: isActive ? 500 : 400,
+                    color: isActive ? "var(--text-1)" : "var(--text-3)",
+                    background: isActive ? "var(--control-bg)" : "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = "var(--control-bg)"
+                      e.currentTarget.style.color = "var(--text-2)"
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = "transparent"
+                      e.currentTarget.style.color = "var(--text-3)"
+                    }
+                  }}
+                >
+                  {mode} Mode
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Collapsible Disclaimer — saves vertical space */}
+        <div
+          className="shrink-0 cursor-pointer transition-colors"
+          style={{
+            padding: "8px 24px",
+            background: "var(--control-bg)",
+            borderBottom: "1px solid var(--panel-border)",
+          }}
+          onClick={() => setDisclaimerExpanded(!disclaimerExpanded)}
+          onKeyDown={(e) => e.key === "Enter" && setDisclaimerExpanded(!disclaimerExpanded)}
+          role="button"
+          tabIndex={0}
+          aria-expanded={disclaimerExpanded}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <p
+              className="font-sans"
+              style={{
+                fontSize: 12,
+                fontStyle: "italic",
+                color: "var(--text-3)",
+                flex: 1,
+              }}
+            >
+              {disclaimerExpanded
+                ? "Responses are grounded in verified historical records and documented sources."
+                : "Grounded in verified historical records"}
+            </p>
+            {disclaimerExpanded ? (
+              <ChevronUp size={14} style={{ color: "var(--text-3)", flexShrink: 0 }} />
+            ) : (
+              <ChevronDown size={14} style={{ color: "var(--text-3)", flexShrink: 0 }} />
+            )}
+          </div>
+        </div>
+
+        {/* Messages — no cards, compact, typewriter for persona */}
+        <div
+          className="flex-1 overflow-y-auto flex flex-col"
+          style={{ padding: "16px 24px 12px", gap: 20 }}
+        >
+          {messages.map((msg) => {
+            if (msg.type === "user") {
+              return (
+                <div
+                  key={msg.id}
+                  className="flex flex-col items-end"
+                  style={{ opacity: 1, animation: "msg-enter 200ms ease-out" }}
+                >
+                  <p
+                    className="font-sans text-right max-w-[85%]"
+                    style={{
+                      fontSize: 13,
+                      color: "var(--text-1)",
+                      lineHeight: 1.55,
+                    }}
+                  >
+                    {msg.text}
+                  </p>
+                  <span
+                    className="font-mono mt-1"
+                    style={{ fontSize: 10, color: "var(--text-3)" }}
+                  >
+                    {msg.timestamp}
+                  </span>
+                </div>
+              )
+            }
+
+            const visibleLen = typewriterLen[msg.id] ?? 0
+            const isTyping = visibleLen < msg.text.length
+            const displayText = msg.text.slice(0, visibleLen)
+
+            return (
+              <div
+                key={msg.id}
+                className="flex gap-3 w-full"
+                style={{
+                  opacity: 1,
+                  animation: "msg-enter 200ms ease-out",
+                }}
+              >
+                <div
+                  className="flex items-center justify-center rounded-full font-serif shrink-0"
+                  style={{
+                    width: 24,
+                    height: 24,
+                    background: "var(--gold-dim)",
+                    color: "var(--gold)",
+                    fontSize: 11,
+                    fontStyle: "italic",
+                  }}
+                >
+                  NT
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className="font-sans"
+                      style={{ fontSize: 12, fontWeight: 600, color: "var(--text-1)" }}
+                    >
+                      Nikola Tesla
+                    </span>
+                    <span
+                      className="font-mono"
+                      style={{ fontSize: 10, color: "var(--text-3)" }}
+                    >
+                      {msg.timestamp}
+                    </span>
+                    {isTyping && (
+                      <span
+                        className="inline-block w-2 h-3 align-middle"
+                        style={{
+                          background: "var(--gold)",
+                          animation: "typewriter 0.6s ease-in-out infinite",
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div>{renderMessageText(displayText, true)}</div>
+                  {msg.sources && msg.sources.length > 0 && (
+                    <div className="mt-2">
+                      <button
+                        onClick={() =>
+                          setExpandedSources((prev) => ({ ...prev, [msg.id]: !prev[msg.id] }))
+                        }
+                        className="font-sans flex items-center gap-1.5 text-left"
+                        style={{
+                          fontSize: 11,
+                          color: "var(--text-3)",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0,
+                          transition: "color var(--transition)",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "var(--gold)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-3)")}
+                      >
+                        <span className="font-mono">Sources ({msg.sources.length})</span>
+                        {expandedSources[msg.id] ? (
+                          <ChevronUp size={12} />
+                        ) : (
+                          <ChevronDown size={12} />
+                        )}
+                      </button>
+                      {expandedSources[msg.id] && (
+                        <div className="flex flex-col gap-1 mt-1.5">
+                          {msg.sources.map((src, i) => (
+                            <span
+                              key={i}
+                              className="font-mono"
+                              style={{ fontSize: 10, color: "var(--text-3)", lineHeight: 1.5 }}
+                            >
+                              {src}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Area — compact */}
+        <div
+          className="shrink-0"
+          style={{
+            background: "var(--panel-bg)",
+            borderTop: "1px solid var(--panel-border)",
+            padding: "12px 24px 16px",
+          }}
+        >
+          <div className="relative max-w-3xl mx-auto flex items-center">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={handleTextareaInput}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask a question grounded in historical record..."
+              className="w-full font-sans resize-none"
+              style={{
+                minHeight: 44,
+                maxHeight: 140,
+                background: "var(--control-bg)",
+                border: "1px solid var(--control-border)",
+                borderRadius: 10,
+                padding: "10px 48px 10px 16px",
+                fontSize: 13,
+                color: "var(--text-1)",
+                lineHeight: 1.5,
+                outline: "none",
+                transition: "border-color var(--transition), box-shadow var(--transition)",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "var(--gold)"
+                e.currentTarget.style.boxShadow = "0 0 0 3px var(--gold-glow)"
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)"
+                e.currentTarget.style.boxShadow = "none"
+              }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim()}
+              className="absolute flex items-center justify-center rounded-[12px] transition-all right-2 top-1/2 -translate-y-1/2 w-9 h-9 border-none"
+              style={{
+                background: input.trim() ? "var(--btn-primary-bg)" : "var(--control-bg)",
+                color: input.trim() ? "var(--btn-primary-fg)" : "var(--text-3)",
+                cursor: input.trim() ? "pointer" : "default",
+              }}
+              onMouseEnter={(e) => {
+                if (input.trim()) {
+                  e.currentTarget.style.background = "var(--btn-primary-bg)"
+                  e.currentTarget.style.filter = "brightness(1.08)"
+                  e.currentTarget.style.transform = "translateY(-50%) scale(1.05)"
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = input.trim() ? "var(--btn-primary-bg)" : "var(--control-bg)"
+                e.currentTarget.style.transform = "translateY(-50%)"
+              }}
+              aria-label="Send message"
+            >
+              <ArrowUp size={18} strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

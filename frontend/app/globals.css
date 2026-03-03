@@ -1,0 +1,813 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* MIMIC AI — Research Palette (Light) */
+  /* Primary #5A7B9E | Secondary #E8F0FE | Neutral 1 #F5F7FA | Neutral 2 #6B7280 | Accent #A3BFFA */
+  --bg: #F5F7FA;
+  --surface-1: #FFFFFF;
+  --surface-2: #E8F0FE;
+  --surface-3: #E0E7FF;
+  --border: rgba(107, 114, 128, 0.25);
+  --border-soft: rgba(107, 114, 128, 0.15);
+  --text-1: #1F2937;
+  --text-2: #6B7280;
+  --text-3: #9CA3AF;
+  --gold: #5A7B9E;
+  --gold-dim: rgba(90, 123, 158, 0.1);
+  --gold-glow: rgba(90, 123, 158, 0.06);
+  --ivory: #1F2937;
+  --teal: #3B82F6;
+  --red: #DC2626;
+  --accent: #A3BFFA;
+  --header-bg: #FFFFFF;
+  --header-text: #1F2937;
+  --header-search-bg: rgba(0, 0, 0, 0.05);
+  --header-search-border: rgba(0, 0, 0, 0.12);
+  --header-search-focus: rgba(90, 123, 158, 0.25);
+  --header-divider: rgba(0, 0, 0, 0.1);
+  --header-icon-hover: rgba(0, 0, 0, 0.06);
+  --header-avatar-bg: rgba(0, 0, 0, 0.08);
+  --sidebar-w: 252px;
+  --topbar-h: 60px;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --transition: 140ms ease;
+  --transition-md: 200ms ease-in-out;
+
+  /* Theme-aware surfaces (light) */
+  --panel-bg: rgba(255, 255, 255, 0.85);
+  --panel-border: rgba(0, 0, 0, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(0, 0, 0, 0.08);
+  --control-bg: rgba(0, 0, 0, 0.04);
+  --control-border: rgba(0, 0, 0, 0.1);
+  --ambient-accent: rgba(90, 123, 158, 0.06);
+  --ambient-teal: rgba(59, 130, 246, 0.04);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --shadow-card-inset: 0 1px 0 rgba(255, 255, 255, 0.8);
+  --btn-primary-bg: var(--gold);
+  --btn-primary-fg: #F5F7FA;
+
+  /* shadcn compat tokens */
+  --background: var(--bg);
+  --foreground: var(--text-1);
+  --card: var(--surface-1);
+  --card-foreground: var(--text-1);
+  --popover: var(--surface-3);
+  --popover-foreground: var(--text-1);
+  --primary: var(--gold);
+  --primary-foreground: #F5F7FA;
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text-1);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-3);
+  --accent-foreground: var(--text-1);
+  --destructive: var(--red);
+  --destructive-foreground: #FFFFFF;
+  --input: var(--border);
+  --ring: var(--gold);
+}
+
+[data-theme="dark"] {
+  /* Dark Mode — Black shades */
+  --bg: #0A0A0A;
+  --surface-1: #121212;
+  --surface-2: #1A1A1A;
+  --surface-3: #242424;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-soft: rgba(255, 255, 255, 0.06);
+  --text-1: #F5F7FA;
+  --text-2: #94A3B8;
+  --text-3: #64748B;
+  --gold: #A3BFFA;
+  --gold-dim: rgba(163, 191, 250, 0.12);
+  --gold-glow: rgba(163, 191, 250, 0.08);
+  --ivory: #F5F7FA;
+  --teal: #38BDF8;
+  --red: #F87171;
+  --accent: #5A7B9E;
+  --header-bg: #0D0D0D;
+  --header-text: #F5F7FA;
+  --header-search-bg: rgba(255, 255, 255, 0.08);
+  --header-search-border: rgba(255, 255, 255, 0.15);
+  --header-search-focus: rgba(163, 191, 250, 0.25);
+  --header-divider: rgba(255, 255, 255, 0.15);
+  --header-icon-hover: rgba(255, 255, 255, 0.08);
+  --header-avatar-bg: rgba(255, 255, 255, 0.15);
+
+  /* Theme-aware surfaces (dark) */
+  --panel-bg: rgba(12, 14, 22, 0.7);
+  --panel-border: rgba(255, 255, 255, 0.07);
+  --card-bg: rgba(18, 18, 18, 0.65);
+  --card-border: rgba(255, 255, 255, 0.07);
+  --control-bg: rgba(255, 255, 255, 0.04);
+  --control-border: rgba(255, 255, 255, 0.08);
+  --ambient-accent: rgba(90, 123, 158, 0.07);
+  --ambient-teal: rgba(56, 189, 248, 0.04);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.45);
+  --shadow-card-inset: 0 1px 0 rgba(255, 255, 255, 0.05);
+  --btn-primary-bg: #A3BFFA;
+  --btn-primary-fg: #0A0A0A;
+}
+
+@theme inline {
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --color-background: var(--bg);
+  --color-foreground: var(--text-1);
+  --color-card: var(--surface-1);
+  --color-card-foreground: var(--text-1);
+  --color-popover: var(--surface-3);
+  --color-popover-foreground: var(--text-1);
+  --color-primary: var(--gold);
+  --color-primary-foreground: #F5F7FA;
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--text-1);
+  --color-muted: var(--surface-2);
+  --color-muted-foreground: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--text-1);
+  --color-destructive: var(--red);
+  --color-destructive-foreground: var(--text-1);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--gold);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--gold-dim);
+    color: var(--text-1);
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  .reveal.visible {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+@keyframes tab-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive bento grid for landing interaction section */
+.bento-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "debate"
+    "influence"
+    "decision"
+    "myth"
+    "legacy";
+}
+
+@media (min-width: 768px) {
+  .bento-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "debate influence"
+      "decision influence"
+      "myth legacy";
+  }
+}
+
+@keyframes pulse-gold {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes msg-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Landing page — dark intelligence aesthetic */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes agent-pulse {
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes blob-float {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(2%, -2%) scale(1.02);
+  }
+
+  66% {
+    transform: translate(-1%, 1%) scale(0.98);
+  }
+}
+
+/* ========== MIMIC AI — Glassmorphism & Premium Refinement ========== */
+
+/* Glass Card System — apply to ALL cards */
+.glass-card {
+  position: relative;
+  background: var(--card-bg);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card), var(--shadow-card-inset) inset;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--gold-glow) 0%, transparent 55%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(163, 191, 250, 0.25);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 0 40px var(--gold-glow);
+}
+
+[data-theme="dark"] .glass-card:hover {
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(163, 191, 250, 0.07);
+}
+
+.glass-card.no-hover-lift:hover {
+  transform: none !important;
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-d1 {
+  transition-delay: 0.1s;
+}
+
+.reveal-d2 {
+  transition-delay: 0.2s;
+}
+
+.reveal-d3 {
+  transition-delay: 0.3s;
+}
+
+/* Keyframes */
+@keyframes nodeGlow {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+  }
+}
+
+@keyframes fillBar {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes typewriter {
+
+  0%,
+  90%,
+  100% {
+    opacity: 1;
+  }
+
+  95% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-score {
+
+  0%,
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(163, 191, 250, 0.4));
+  }
+
+  50% {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 16px rgba(163, 191, 250, 0.6));
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes status-badge {
+
+  0%,
+  45% {
+    content: '● Running...';
+    color: #38BDF8;
+  }
+
+  50%,
+  95% {
+    content: '✓ Complete';
+    color: #A3BFFA;
+  }
+
+  100% {
+    content: '● Running...';
+    color: #38BDF8;
+  }
+}
+
+/* Typography refinements */
+.section-title {
+  font-size: clamp(44px, 5.5vw, 72px);
+}
+
+.card-body-text {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.mono-label {
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+/* Border radius standardization */
+.radius-card-lg {
+  border-radius: 20px;
+}
+
+.radius-card-md {
+  border-radius: 18px;
+}
+
+.radius-input {
+  border-radius: 10px;
+}
+
+.radius-btn {
+  border-radius: 10px;
+}
+
+.radius-pill {
+  border-radius: 100px;
+}
+
+.radius-agent {
+  border-radius: 10px;
+}
+
+/* ========== Buttons — consistent styling & contrast ========== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.25;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Primary — theme-aware contrast */
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--gold-glow);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background: rgba(163, 191, 250, 0.4);
+  color: rgba(10, 10, 10, 0.5);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Secondary — outline, good contrast on dark bg */
+.btn-secondary {
+  background: transparent;
+  color: #A3BFFA;
+  border: 1.5px solid rgba(163, 191, 250, 0.5);
+}
+
+.btn-secondary:hover {
+  background: rgba(163, 191, 250, 0.12);
+  border-color: rgba(163, 191, 250, 0.7);
+  color: #B8CFFC;
+}
+
+.btn-secondary:active {
+  background: rgba(163, 191, 250, 0.18);
+}
+
+/* Ghost — subtle, for toolbars / less emphasis */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-1);
+}
+
+.btn-ghost:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Soft — for empty states, low emphasis CTAs */
+.btn-soft {
+  background: rgba(163, 191, 250, 0.1);
+  color: #A3BFFA;
+  border: 1px solid rgba(163, 191, 250, 0.25);
+}
+
+.btn-soft:hover {
+  background: rgba(163, 191, 250, 0.18);
+  border-color: rgba(163, 191, 250, 0.4);
+  color: #B8CFFC;
+}
+
+/* ========== Intelligence Projects Page — design system ========== */
+
+/* Page ambient background (theme-aware) */
+.intelligence-projects-page {
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 20%, var(--ambient-accent) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 85% 80%, var(--ambient-teal) 0%, transparent 50%),
+    var(--bg);
+}
+
+/* Glass project card (theme-aware) */
+.project-card {
+  position: relative;
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card), var(--shadow-card-inset) inset;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+}
+
+.project-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+      var(--gold-glow) 0%,
+      transparent 50%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.project-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      var(--gold-dim),
+      transparent);
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(163, 191, 250, 0.25);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.2),
+    0 0 30px var(--gold-glow),
+    var(--shadow-card-inset) inset;
+}
+
+[data-theme="dark"] .project-card:hover {
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.55),
+    0 0 30px rgba(163, 191, 250, 0.05),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+/* Scroll reveal for project cards */
+.project-card.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.project-card.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.project-card.reveal:hover {
+  transform: translateY(-3px);
+}
+
+/* Search bar wrapper — Intelligence Projects (theme-aware) */
+.intelligence-search-bar {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.intelligence-search-bar:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+
+.intelligence-search-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-1);
+  outline: none;
+}
+
+.intelligence-search-input::placeholder {
+  color: var(--text-3);
+}
+
+/* Filter tabs */
+.intelligence-filter-tab {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.intelligence-filter-tab.active {
+  background: rgba(163, 191, 250, 0.1);
+  border-color: rgba(163, 191, 250, 0.2);
+  color: var(--gold);
+}
+
+.intelligence-filter-tab:not(.active):hover {
+  color: var(--text-2);
+  background: var(--control-bg);
+}
+
+/* New Project button — Intelligence page (theme-aware) */
+.btn-intelligence-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+
+.btn-intelligence-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px var(--gold-glow);
+}
+
+/* Empty state container (theme-aware) */
+.intelligence-empty-state {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 64px;
+}
+
+/* ========== Dashboard (research) — theme-aware ========== */
+
+/* Dashboard page ambient background */
+.dashboard-page {
+  min-height: 100%;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 20%, var(--ambient-accent) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 85% 80%, var(--ambient-teal) 0%, transparent 50%),
+    var(--bg);
+}
+
+/* Glass section cards for dashboard tabs (theme-aware) */
+.dashboard-section {
+  position: relative;
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card), var(--shadow-card-inset) inset;
+  overflow: hidden;
+}
+
+.dashboard-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+      var(--gold-glow) 0%,
+      transparent 50%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.dashboard-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      var(--gold-dim),
+      transparent);
+}
