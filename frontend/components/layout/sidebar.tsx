@@ -61,10 +61,8 @@ export function Sidebar({
         top: "var(--topbar-h)",
         height: "calc(100vh - var(--topbar-h))",
         width: expanded ? "var(--sidebar-w)" : 56,
-        background: "var(--panel-bg)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderRight: "1px solid var(--panel-border)",
+        background: "var(--bg)",
+        borderRight: "1px solid var(--border)",
         transition: "width 220ms cubic-bezier(0.4, 0, 0.2, 1)",
         zIndex: 40,
       }}
@@ -75,14 +73,15 @@ export function Sidebar({
           <div key={group.label}>
             {expanded && (
               <div
-                className="font-sans"
+                className="font-mono"
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
                   textTransform: "uppercase",
-                  letterSpacing: "0.1em",
+                  letterSpacing: "0.15em",
                   color: "var(--text-3)",
                   padding: "20px 16px 6px 20px",
+                  opacity: 0.8
                 }}
               >
                 {group.label}

@@ -1,7 +1,15 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Plus, ArrowUp, Menu, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowUp, ChevronDown, ChevronUp, History, SquarePen } from "lucide-react"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 const TYPEWRITER_MS_PER_CHAR = 18
 
@@ -45,7 +53,6 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
   const [input, setInput] = useState("")
   const [activeMode, setActiveMode] = useState<"historical" | "interpretive">("historical")
   const [activeSession, setActiveSession] = useState("1")
-  const [showMobileSessions, setShowMobileSessions] = useState(false)
   const [expandedSources, setExpandedSources] = useState<Record<string, boolean>>({})
   const [disclaimerExpanded, setDisclaimerExpanded] = useState(false)
   const [typewriterLen, setTypewriterLen] = useState<Record<string, number>>({})
@@ -149,118 +156,8 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
         overflow: "hidden",
       }}
     >
-      {showMobileSessions && (
-        <div
-          className="fixed inset-0 z-30 bg-black/40 min-[1200px]:hidden backdrop-blur-sm"
-          style={{ top: "var(--topbar-h)" }}
-          onClick={() => setShowMobileSessions(false)}
-        />
-      )}
-
-      {/* Sessions Sidebar — cleaner, less dense */}
-      <div
-        className={`flex flex-col shrink-0 transition-transform duration-200 ease-out z-40 ${showMobileSessions
-          ? "max-[1200px]:fixed max-[1200px]:left-0 max-[1200px]:top-[var(--topbar-h)] max-[1200px]:bottom-0 max-[1200px]:translate-x-0 max-[1200px]:shadow-2xl"
-          : "max-[1200px]:fixed max-[1200px]:left-0 max-[1200px]:top-[var(--topbar-h)] max-[1200px]:bottom-0 max-[1200px]:-translate-x-full"
-          }`}
-        style={{
-          width: 260,
-          background: "var(--panel-bg)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderRight: "1px solid var(--panel-border)",
-        }}
-      >
-        <div
-          className="flex items-center justify-between shrink-0"
-          style={{ padding: "16px 18px" }}
-        >
-          <span
-            className="font-mono"
-            style={{
-              fontSize: 10,
-              color: "var(--text-3)",
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-            }}
-          >
-            Sessions
-          </span>
-          <button
-            className="flex items-center justify-center rounded-lg transition-colors"
-            style={{
-              width: 28,
-              height: 28,
-              background: "var(--gold-dim)",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--gold)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "var(--gold)"
-              e.currentTarget.style.color = "var(--primary-foreground)"
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "var(--gold-dim)"
-              e.currentTarget.style.color = "var(--gold)"
-            }}
-            aria-label="New session"
-          >
-            <Plus size={14} />
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto" style={{ padding: "0 12px 16px" }}>
-          {sessions.map((session) => {
-            const isActive = activeSession === session.id
-            return (
-              <button
-                key={session.id}
-                onClick={() => setActiveSession(session.id)}
-                className="w-full text-left rounded-lg transition-all"
-                style={{
-                  padding: "12px 14px",
-                  cursor: "pointer",
-                  background: isActive ? "var(--gold-dim)" : "transparent",
-                  border: "none",
-                  marginBottom: 4,
-                  transition: "var(--transition)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.background = "var(--surface-2)"
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.background = "transparent"
-                }}
-              >
-                <div
-                  className="font-sans"
-                  style={{
-                    fontSize: 13,
-                    fontWeight: isActive ? 500 : 400,
-                    color: isActive ? "var(--text-1)" : "var(--text-2)",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {session.topic}
-                </div>
-                <div
-                  className="font-mono"
-                  style={{ fontSize: 11, color: "var(--text-3)", marginTop: 6 }}
-                >
-                  {session.date}
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
       {/* Conversation Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0" style={{ margin: "0 auto", maxWidth: "1200px" }}>
         {/* Compact Persona Header — single row, less vertical space */}
         <div
           className="flex items-center justify-between shrink-0"
@@ -272,22 +169,7 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
           }}
         >
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowMobileSessions(true)}
-              className="min-[1200px]:hidden flex items-center justify-center rounded-lg -ml-1"
-              style={{
-                width: 36,
-                height: 36,
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "var(--text-2)",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--control-bg)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-            >
-              <Menu size={18} />
-            </button>
+            {/* Remoded Mobile Menu Toggle */}
 
             {onBack && (
               <button
@@ -381,6 +263,108 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
                 </button>
               )
             })}
+
+            <div style={{ width: 1, height: 20, background: "var(--border-soft)", margin: "0 8px" }} />
+
+            <button
+              className="font-sans flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--text-2)",
+                background: "transparent",
+                border: "1px solid var(--border)",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--control-bg)"
+                e.currentTarget.style.color = "var(--text-1)"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent"
+                e.currentTarget.style.color = "var(--text-2)"
+              }}
+              title="New Session"
+            >
+              <SquarePen size={14} />
+              <span className="hidden sm:inline">New Session</span>
+            </button>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <button
+                  className="font-sans flex items-center gap-2 rounded-lg px-3 py-2 transition-all ml-2"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: "var(--text-2)",
+                    background: "var(--control-bg)",
+                    border: "1px solid var(--border)",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "var(--surface-3)"
+                    e.currentTarget.style.color = "var(--text-1)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "var(--control-bg)"
+                    e.currentTarget.style.color = "var(--text-2)"
+                  }}
+                  title="History"
+                >
+                  <History size={14} />
+                  <span className="hidden sm:inline">History</span>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Session History</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col gap-2 mt-4 max-h-[60vh] overflow-y-auto">
+                  {sessions.map((session) => {
+                    const isActive = activeSession === session.id
+                    return (
+                      <button
+                        key={session.id}
+                        onClick={() => setActiveSession(session.id)}
+                        className="w-full text-left rounded-lg transition-all border"
+                        style={{
+                          padding: "16px",
+                          cursor: "pointer",
+                          background: isActive ? "var(--gold-dim)" : "var(--control-bg)",
+                          borderColor: isActive ? "var(--gold)" : "var(--border)",
+                          transition: "var(--transition)",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) e.currentTarget.style.background = "var(--surface-3)"
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive) e.currentTarget.style.background = "var(--control-bg)"
+                        }}
+                      >
+                        <div
+                          className="font-sans"
+                          style={{
+                            fontSize: 14,
+                            fontWeight: isActive ? 500 : 400,
+                            color: isActive ? "var(--text-1)" : "var(--text-2)",
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {session.topic}
+                        </div>
+                        <div
+                          className="font-mono mt-2"
+                          style={{ fontSize: 11, color: "var(--text-3)" }}
+                        >
+                          {session.date}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 

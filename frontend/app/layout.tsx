@@ -1,26 +1,33 @@
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans, JetBrains_Mono } from 'next/font/google'
-import { Cormorant_Garamond } from 'next/font/google'
+import { Space_Mono, Spectral, DM_Mono, Space_Grotesk } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const dmSans = DM_Sans({
+const spaceMono = Space_Mono({
   subsets: ['latin'],
-  variable: '--font-dm-sans',
-  weight: ['300', '400', '500', '600'],
+  variable: '--font-space-mono',
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
 })
 
-const cormorant = Cormorant_Garamond({
+const spectral = Spectral({
   subsets: ['latin'],
-  variable: '--font-cormorant',
+  variable: '--font-spectral',
   weight: ['300', '400', '500', '600'],
   style: ['normal', 'italic'],
 })
 
-const jetbrainsMono = JetBrains_Mono({
+const dmMono = DM_Mono({
   subsets: ['latin'],
-  variable: '--font-jetbrains',
+  variable: '--font-dm-mono',
   weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
+})
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -38,8 +45,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${cormorant.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
-      <body className="font-sans antialiased">
+    <html lang="en" className={`${spaceMono.variable} ${spectral.variable} ${dmMono.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
+      <body className="antialiased">
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){var t=localStorage.getItem("mimic.theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");})();`,

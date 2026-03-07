@@ -68,6 +68,7 @@ export function CreateProjectFlow({ onComplete, onClose }: CreateProjectFlowProp
                 {step === 2 && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <EntitySelection
+                            searchQuery={projectData?.target || ""}
                             onSelect={handleEntitySelect}
                             onBack={() => setStep(1)}
                         />

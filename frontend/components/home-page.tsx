@@ -8,7 +8,9 @@ import {
   FolderOpen,
   ChevronDown,
   MoreHorizontal,
-  ExternalLink,
+  Pencil,
+  Archive,
+  Trash2,
 } from "lucide-react"
 
 interface HomePageProject {
@@ -30,6 +32,245 @@ interface HomePageProps {
   onOpenProject: (projectId: string) => void
 }
 
+/* ─────────────────────────────────────────────────
+   PROJECT CARD
+───────────────────────────────────────────────── */
+function ProjectCard({
+  project,
+  onClick,
+}: {
+  project: HomePageProject
+  onClick: () => void
+}) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Derive initials from targetName
+  const initials = project.profile?.initials ||
+    project.targetName
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? "")
+      .join("")
+
+  const description = project.description
+
+  const formattedDate = (() => {
+    try {
+      return new Date(project.createdDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    } catch {
+      return project.createdDate
+    }
+  })()
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [menuOpen])
+
+  return (
+    <article
+      className="project-card reveal cursor-pointer"
+      onClick={onClick}
+      style={{
+        padding: 16,
+        borderRadius: 12,
+        background: "var(--surface-1)",
+        border: "1px solid var(--border-soft)",
+        minHeight: 140,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        fontFamily: "var(--font-ui), sans-serif",
+        position: "relative",
+        transition: "var(--transition)",
+      }}
+    >
+      <div>
+        {/* TOP ROW: Avatar + Entity/Project info */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+          {/* Avatar block */}
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 8,
+              flexShrink: 0,
+              background: "var(--surface-3)",
+              border: "1px solid var(--border-soft)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 14,
+              fontWeight: 700,
+              color: "var(--text-1)",
+              fontFamily: "var(--font-primary), monospace",
+            }}
+          >
+            {initials}
+          </div>
+
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--text-1)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                lineHeight: 1.2,
+              }}
+            >
+              {project.targetName}
+            </div>
+            <div
+              className="font-mono text-[11px]"
+              style={{
+                color: "var(--text-3)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                marginTop: 2,
+              }}
+            >
+              Project: {project.name}
+            </div>
+          </div>
+        </div>
+
+        {/* DESCRIPTION */}
+        {description && (
+          <p
+            className="font-ui text-[13px]"
+            style={{
+              margin: 0,
+              color: "var(--text-3)",
+              lineHeight: 1.5,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              marginBottom: 12,
+            }}
+          >
+            {description}
+          </p>
+        )}
+      </div>
+
+      {/* FOOTER ROW */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingTop: 12,
+          borderTop: "1px solid var(--border-soft)",
+          marginTop: "auto"
+        }}
+      >
+        <span
+          className="font-mono text-[11px]"
+          style={{ color: "var(--text-3)" }}
+        >
+          {formattedDate}
+        </span>
+
+        {/* Status dot */}
+        <div
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: project.status === "archived" ? "var(--text-3)" : "#22C55E"
+          }}
+        />
+
+        {/* Menu icon */}
+        <div style={{ position: "relative" }} ref={menuRef} onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--text-3)",
+              cursor: "pointer",
+              padding: 4,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <MoreHorizontal size={14} />
+          </button>
+
+          {menuOpen && (
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                bottom: "calc(100% + 4px)",
+                background: "var(--surface-1)",
+                border: "1px solid var(--border-soft)",
+                borderRadius: 8,
+                padding: 4,
+                minWidth: 120,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                zIndex: 50,
+              }}
+            >
+              {[
+                { icon: Pencil, label: "Edit", color: "var(--text-2)" },
+                { icon: Archive, label: "Archive", color: "var(--text-2)" },
+                { icon: Trash2, label: "Delete", color: "#F87171" },
+              ].map(({ icon: Icon, label, color }) => (
+                <button
+                  key={label}
+                  type="button"
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "6px 8px",
+                    borderRadius: 6,
+                    border: "none",
+                    background: "transparent",
+                    color,
+                    fontSize: 12,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    fontFamily: "var(--font-ui), sans-serif",
+                  }}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Icon size={12} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </article>
+  )
+}
+
+/* ─────────────────────────────────────────────────
+   HOME PAGE
+───────────────────────────────────────────────── */
 export function HomePage({ projects, onCreateProject, onOpenProject }: HomePageProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [filter, setFilter] = useState<"all" | "active" | "archived">("all")
@@ -42,33 +283,26 @@ export function HomePage({ projects, onCreateProject, onOpenProject }: HomePageP
     { label: "A-Z Name", value: "name" as const },
   ]
 
-  const activeSortLabel = sortOptions.find(o => o.value === sortBy)?.label || "Sort"
+  const activeSortLabel = sortOptions.find((o) => o.value === sortBy)?.label || "Sort"
 
   const filteredProjects = useMemo(() => {
     let result = [...projects]
-
-    // Search
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
-      result = result.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.targetName.toLowerCase().includes(q)
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) || p.targetName.toLowerCase().includes(q)
       )
     }
-
-    // Filter
     if (filter !== "all") {
-      result = result.filter(p => p.status === filter)
+      result = result.filter((p) => p.status === filter)
     }
-
-    // Sort
     result.sort((a, b) => {
       if (sortBy === "name") return a.name.localeCompare(b.name)
       const dateA = new Date(a.createdDate).getTime()
       const dateB = new Date(b.createdDate).getTime()
       return sortBy === "newest" ? dateB - dateA : dateA - dateB
     })
-
     return result
   }, [projects, searchQuery, filter, sortBy])
 
@@ -81,7 +315,7 @@ export function HomePage({ projects, onCreateProject, onOpenProject }: HomePageP
     const cards = grid.querySelectorAll(".project-card.reveal")
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry, i) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const el = entry.target as HTMLElement
             el.style.transitionDelay = `${Array.from(cards).indexOf(el) * 0.08}s`
@@ -96,321 +330,191 @@ export function HomePage({ projects, onCreateProject, onOpenProject }: HomePageP
   }, [filteredProjects])
 
   return (
-    <div className="intelligence-projects-page mx-auto w-full max-w-[1320px] px-6 py-12 min-h-screen">
-      {/* 1. PAGE HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+    <div className="intelligence-projects-page w-full h-full flex flex-col" style={{ paddingLeft: 32, paddingRight: 32, paddingTop: 24, overflow: "hidden" }}>
+      {/* 1. COMPACT PAGE HEADER */}
+      <div
+        className="flex items-center justify-between gap-6 pb-4 mb-4 border-b"
+        style={{ height: 64, borderColor: "var(--border-soft)" }}
+      >
         <div>
           <h1
-            className="font-serif italic"
+            className="font-mono"
             style={{
               color: "var(--text-1)",
-              fontSize: "clamp(32px, 4vw, 48px)",
-              fontWeight: 400,
-              letterSpacing: "-0.01em",
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.15em",
+              margin: 0
             }}
           >
             Intelligence Projects
           </h1>
-          <p
-            className="font-sans"
-            style={{ fontSize: 14, color: "var(--text-2)", marginTop: 6 }}
-          >
-            Create and manage structured research sessions.
+          <p className="font-ui" style={{ fontSize: 12, color: "var(--text-3)", margin: 0 }}>
+            Manage and research verified intelligence profiles.
           </p>
-          <div
-            style={{
-              width: 48,
-              height: 1,
-              background: "linear-gradient(90deg, var(--gold), transparent)",
-              marginTop: 16,
-              opacity: 0.5,
-            }}
-          />
         </div>
 
         <button
           onClick={onCreateProject}
           className="btn-intelligence-primary flex items-center gap-2"
+          style={{ height: 36, padding: "0 16px", fontSize: 13 }}
         >
-          <Plus size={18} strokeWidth={2.5} />
+          <Plus size={16} />
           New Project
         </button>
       </div>
 
-      {/* 2. CONTROLS */}
-      {isEmpty ? null : (
+      {/* 2. SLIM CONTROLS */}
+      {!isEmpty && (
         <div
-          className="flex flex-col lg:flex-row lg:items-center gap-4 p-5 mb-10"
-          style={{
-            background: "var(--control-bg)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid var(--control-border)",
-            borderRadius: 20,
-          }}
+          className="flex items-center gap-6 mb-5"
+          style={{ height: 36 }}
         >
-          <div className="flex flex-1 items-center gap-3 px-4 py-2.5">
-            <Search size={18} style={{ color: "var(--text-3)", flexShrink: 0 }} />
+          {/* Search Input */}
+          <div
+            className="flex items-center gap-2 px-3 h-full rounded-md border"
+            style={{ background: "var(--surface-1)", borderColor: "var(--border-soft)", width: 340 }}
+          >
+            <Search size={14} style={{ color: "var(--text-3)", flexShrink: 0 }} />
             <input
               type="text"
-              placeholder="Search projects by name or target..."
-              className="intelligence-search-input w-full bg-transparent outline-none pl-0"
-              style={{ padding: "10px 0" }}
+              placeholder="Search..."
+              className="bg-transparent outline-none font-ui text-sm w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              {(["all", "active", "archived"] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setFilter(t)}
-                  className={`intelligence-filter-tab capitalize ${filter === t ? "active" : ""}`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-
-            <div className="relative">
+          {/* Filter Tabs */}
+          <div className="flex flex-1 justify-center items-center gap-4 h-full">
+            {(["all", "active", "archived"] as const).map((t) => (
               <button
-                className="flex items-center gap-2 font-mono text-xs font-medium px-4 py-2 rounded-[10px] transition-colors"
+                key={t}
+                onClick={() => setFilter(t)}
+                className={`font-ui text-xs font-medium capitalize h-full px-2 transition-colors relative`}
                 style={{
-                  color: "var(--text-2)",
-                  background: "var(--control-bg)",
-                  border: "1px solid var(--control-border)",
-                  cursor: "pointer",
+                  color: filter === t ? "var(--text-1)" : "var(--text-3)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer"
                 }}
-                onClick={() => setIsSortOpen(!isSortOpen)}
               >
-                <ArrowUpDown size={14} style={{ color: "var(--text-3)" }} />
-                {activeSortLabel}
-                <ChevronDown size={12} className={`transition-transform duration-200 ${isSortOpen ? "rotate-180" : ""}`} style={{ color: "var(--text-3)" }} />
+                {t}
+                {filter === t && (
+                  <span
+                    className="absolute bottom-[-10px] left-0 right-0 h-[2px] bg-gold rounded-full"
+                    style={{ background: "var(--gold)" }}
+                  />
+                )}
               </button>
+            ))}
+          </div>
 
-              {isSortOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsSortOpen(false)} />
-                  <div
-                    className="absolute right-0 mt-2 py-1.5 z-50 rounded-[14px]"
-                    style={{
-                      background: "var(--surface-1)",
-                      border: "1px solid var(--border-soft)",
-                      minWidth: 160,
-                    }}
-                  >
-                    {sortOptions.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => {
-                          setSortBy(opt.value)
-                          setIsSortOpen(false)
-                        }}
-                        className="w-full text-left px-4 py-2.5 font-sans text-xs transition-colors rounded-[10px] mx-1"
-                        style={{
-                          color: sortBy === opt.value ? "var(--gold)" : "var(--text-2)",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "var(--control-bg)"
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "none"
-                        }}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+          {/* Sort Dropdown */}
+          <div className="relative h-full">
+            <button
+              className="flex items-center gap-2 font-mono text-[11px] h-full px-3 rounded-md border"
+              style={{
+                color: "var(--text-2)",
+                background: "var(--surface-1)",
+                borderColor: "var(--border-soft)",
+                cursor: "pointer",
+              }}
+              onClick={() => setIsSortOpen(!isSortOpen)}
+            >
+              <ArrowUpDown size={12} style={{ color: "var(--text-3)" }} />
+              {activeSortLabel}
+              <ChevronDown
+                size={10}
+                className={`transition-transform duration-200 ${isSortOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {isSortOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsSortOpen(false)} />
+                <div
+                  className="absolute right-0 mt-2 py-2 z-50 rounded-lg shadow-lg border"
+                  style={{
+                    background: "var(--surface-1)",
+                    borderColor: "var(--border-soft)",
+                    minWidth: 140,
+                  }}
+                >
+                  {sortOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => {
+                        setSortBy(opt.value)
+                        setIsSortOpen(false)
+                      }}
+                      className="w-full text-left px-4 py-2 font-ui text-xs transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      style={{
+                        color: sortBy === opt.value ? "var(--gold)" : "var(--text-2)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* 3. PROJECT LIST / EMPTY STATE */}
-      <div>
+      {/* 3. PROJECT GRID */}
+      <div className="flex-1 overflow-y-auto pb-10 pr-2 -mr-2" style={{ marginTop: 20 }}>
         {isEmpty ? (
-          <div className="intelligence-empty-state flex flex-col items-center justify-center text-center max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center text-center py-20 max-w-sm mx-auto">
             <span
-              className="font-mono mb-6"
-              style={{
-                fontSize: 48,
-                color: "var(--text-3)",
-                opacity: 0.6,
-              }}
+              className="font-mono mb-4"
+              style={{ fontSize: 40, color: "var(--text-3)", opacity: 0.5 }}
             >
-              ∅
+              / EMPTY
             </span>
             <h2
-              className="font-serif text-2xl mb-2 italic"
-              style={{ color: "var(--text-2)", fontWeight: 400 }}
+              className="font-ui text-xl mb-2 font-semibold"
+              style={{ color: "var(--text-1)" }}
             >
-              No intelligence profiles yet
+              No Projects Found
             </h2>
             <p
-              className="font-sans mb-8"
-              style={{ fontSize: 14, color: "var(--text-3)", lineHeight: 1.5 }}
+              className="font-ui mb-6"
+              style={{ fontSize: 13, color: "var(--text-3)", lineHeight: 1.5 }}
             >
-              Start by researching a person.
+              Get started by creating your first intelligence project.
             </p>
-            <button onClick={onCreateProject} className="btn-intelligence-primary flex items-center gap-2">
-              <Plus size={18} strokeWidth={2.5} />
+            <button
+              onClick={onCreateProject}
+              className="btn-intelligence-primary flex items-center gap-2"
+            >
+              <Plus size={16} />
               New Project
             </button>
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="py-16" style={{ borderBottom: "1px solid var(--border-soft)" }}>
-            <p className="font-sans text-sm" style={{ color: "var(--text-3)" }}>
-              No projects found matching your search.
+          <div className="py-12 border-t" style={{ borderColor: "var(--border-soft)" }}>
+            <p className="font-ui text-sm" style={{ color: "var(--text-3)" }}>
+              No results for "{searchQuery}".
             </p>
           </div>
         ) : (
           <div
             ref={gridRef}
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[14px]"
           >
-            {filteredProjects.map((project) => {
-              const isActive = project.status !== "archived"
-              const personaLine =
-                project.description ||
-                (project.profile
-                  ? `${project.profile.category} · ${project.profile.era}`
-                  : null)
-              const agentsLabel =
-                project.agentCount != null || project.sourceCount != null
-                  ? `${project.agentCount ?? "—"} agents · ${project.sourceCount ?? "—"} sources`
-                  : null
-              return (
-                <article
-                  key={project.id}
-                  onClick={() => onOpenProject(project.id)}
-                  className="project-card reveal flex flex-col cursor-pointer"
-                  style={{ padding: "24px 20px" }}
-                >
-                  <div className="relative flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3
-                        className="font-serif text-xl font-light italic leading-tight"
-                        style={{
-                          color: "var(--text-1)",
-                          letterSpacing: "-0.02em",
-                        }}
-                      >
-                        {project.targetName}
-                      </h3>
-                      <p
-                        className="font-sans text-sm mt-0.5"
-                        style={{ color: "var(--text-3)" }}
-                      >
-                        {project.name}
-                      </p>
-                    </div>
-                    <span
-                      className="font-mono flex items-center gap-1.5 flex-shrink-0"
-                      style={{
-                        fontSize: 10,
-                        letterSpacing: "0.1em",
-                        padding: "3px 10px",
-                        borderRadius: 100,
-                        background: isActive
-                          ? "rgba(56,189,248,0.1)"
-                          : "rgba(255,255,255,0.06)",
-                        border: `1px solid ${isActive ? "rgba(56,189,248,0.2)" : "rgba(255,255,255,0.08)"}`,
-                        color: isActive ? "var(--teal)" : "var(--text-3)",
-                      }}
-                    >
-                      {isActive ? (
-                        <>
-                          <span
-                            style={{
-                              width: 4,
-                              height: 4,
-                              borderRadius: "50%",
-                              background: "var(--teal)",
-                              boxShadow: "0 0 6px var(--teal)",
-                            }}
-                          />
-                          Active
-                        </>
-                      ) : (
-                        "Archived"
-                      )}
-                    </span>
-                  </div>
-
-                  {personaLine && (
-                    <p
-                      className="font-sans mt-2"
-                      style={{
-                        fontSize: 12,
-                        lineHeight: 1.5,
-                        color: "var(--text-3)",
-                      }}
-                    >
-                      {personaLine}
-                    </p>
-                  )}
-
-                  <div
-                    className="mt-4 pt-4"
-                    style={{
-                      borderTop: "1px solid rgba(255,255,255,0.05)",
-                      margin: "16px 0",
-                    }}
-                  />
-
-                  {agentsLabel && (
-                    <p
-                      className="font-mono mb-2"
-                      style={{
-                        fontSize: 10,
-                        color: "var(--gold)",
-                        opacity: 0.7,
-                      }}
-                    >
-                      {agentsLabel}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="font-mono"
-                      style={{
-                        fontSize: 10,
-                        color: "var(--text-3)",
-                        letterSpacing: "0.08em",
-                      }}
-                    >
-                      {project.createdDate}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onOpenProject(project.id)
-                      }}
-                      className="p-1 rounded transition-colors"
-                      style={{ color: "var(--text-3)" }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = "var(--text-1)"
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = "var(--text-3)"
-                      }}
-                      aria-label="More options"
-                    >
-                      <MoreHorizontal size={16} />
-                    </button>
-                  </div>
-                </article>
-              )
-            })}
+            {filteredProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onClick={() => onOpenProject(project.id)}
+              />
+            ))}
           </div>
         )}
       </div>

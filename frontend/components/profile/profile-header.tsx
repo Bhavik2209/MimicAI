@@ -40,10 +40,8 @@ export function ProfileHeader({ profile, activeTab, onTabChange, projectContext,
         position: "sticky",
         top: 0,
         zIndex: 20,
-        background: "var(--panel-bg)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid var(--panel-border)",
+        background: "var(--bg)",
+        borderBottom: "1px solid var(--border)",
         padding: "14px 24px 16px",
       }}
     >

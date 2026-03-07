@@ -106,17 +106,19 @@ export function TimelineTab() {
         <div className="max-w-4xl mx-auto px-8 py-12">
             <div className="mb-12">
                 <h2
-                    className="font-serif mb-4"
+                    className="mb-4"
                     style={{
                         fontSize: 32,
                         color: "var(--ivory)",
                         fontWeight: 500,
                         fontStyle: "italic",
+                        fontFamily: "var(--font-reading), serif",
+                        lineHeight: 1.2,
                     }}
                 >
                     Chronology & Milestones
                 </h2>
-                <p className="font-sans text-lg" style={{ color: "var(--text-2)" }}>
+                <p className="text-lg" style={{ color: "var(--text-2)", fontFamily: "var(--font-ui), sans-serif", letterSpacing: "0.02em" }}>
                     The defining moments and breakthrough discoveries spanning the lifetime of the entity.
                 </p>
             </div>
@@ -154,29 +156,29 @@ export function TimelineTab() {
                                 <div className="flex-1 pb-2">
                                     <div className="flex items-baseline gap-4 mb-3">
                                         <span
-                                            className="font-mono text-2xl font-medium tracking-tight"
-                                            style={{ color: "var(--gold)" }}
+                                            className="text-2xl font-medium tracking-tight"
+                                            style={{ color: "var(--gold)", fontFamily: "var(--font-data), monospace" }}
                                         >
                                             {item.year}
                                         </span>
                                         <span
-                                            className="font-mono text-xs uppercase tracking-widest"
-                                            style={{ color: color }}
+                                            className="text-xs uppercase"
+                                            style={{ color: color, fontFamily: "var(--font-primary), monospace", letterSpacing: "0.15em" }}
                                         >
                                             {item.category}
                                         </span>
                                     </div>
 
                                     <h3
-                                        className="font-serif text-2xl mb-2"
-                                        style={{ color: "var(--ivory)", fontWeight: 500 }}
+                                        className="text-2xl mb-2"
+                                        style={{ color: "var(--ivory)", fontWeight: 500, fontFamily: "var(--font-primary), monospace", letterSpacing: "0.02em" }}
                                     >
                                         {item.title}
                                     </h3>
 
                                     <p
-                                        className="font-sans text-base leading-relaxed"
-                                        style={{ color: "var(--text-2)" }}
+                                        className="text-base"
+                                        style={{ color: "var(--text-2)", fontFamily: "var(--font-reading), serif", lineHeight: 1.8 }}
                                     >
                                         {item.description}
                                     </p>

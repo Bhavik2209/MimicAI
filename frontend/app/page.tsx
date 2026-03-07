@@ -1,17 +1,7 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useState } from "react"
 
-function LandingWrapper({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", "dark")
-    return () => {
-      const saved = localStorage.getItem("mimic.theme")
-      document.documentElement.setAttribute("data-theme", saved || "light")
-    }
-  }, [])
-  return <div style={{ background: "#0A0A0A", minHeight: "100vh" }}>{children}</div>
-}
 import { AppShell } from "@/components/layout/app-shell"
 import { HomePage } from "@/components/home-page"
 import { ProfileHeader } from "@/components/profile/profile-header"
@@ -26,6 +16,7 @@ import { SettingsTab } from "@/components/tabs/settings-tab"
 import { CreateProjectFlow } from "@/components/project/create-project-flow"
 import { LandingPage } from "@/components/landing-page"
 import { LandingNav } from "@/components/layout/landing-nav"
+import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
 
 const initialTeslaProfile = {
   name: "Nikola Tesla",
@@ -175,10 +166,10 @@ export default function Page() {
 
   if (view === "landing") {
     return (
-      <LandingWrapper>
+      <div className="landing-page" style={{ background: "var(--bg)", minHeight: "100vh" }}>
         <LandingNav onTryMimic={handleGetStarted} />
         <LandingPage onGetStarted={handleGetStarted} />
-      </LandingWrapper>
+      </div>
     )
   }
 
@@ -200,11 +191,16 @@ export default function Page() {
   if (view === "home") {
     return (
       <AppShell
-        activeTab=""
+        activeTab="projects"
         onTabChange={handleTabChange}
         onSettingsClick={handleSettingsClick}
         onLogoClick={handleLogoClick}
-        hideSidebar
+        customSidebar={
+          <DashboardSidebar
+            activeTab={activeTab === "" ? "projects" : activeTab}
+            onTabChange={handleTabChange}
+          />
+        }
       >
         <HomePage
           projects={projects}

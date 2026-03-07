@@ -24,6 +24,7 @@ interface AppShellProps {
   } | null
   sidebarCollapsedDefault?: boolean
   hideSidebar?: boolean
+  customSidebar?: ReactNode
 }
 
 export function AppShell({
@@ -36,12 +37,10 @@ export function AppShell({
   projectContext,
   sidebarCollapsedDefault = false,
   hideSidebar = false,
+  customSidebar,
 }: AppShellProps) {
   const { expanded, toggle } = useSidebar()
-  const isChatMode = activeTab === "chat"
-
-  // Force collapsed state if in chat mode
-  const isExpanded = isChatMode ? false : (sidebarCollapsedDefault ? false : expanded)
+  const isExpanded = sidebarCollapsedDefault ? false : expanded
 
   return (
     <div
@@ -50,13 +49,15 @@ export function AppShell({
     >
       <TopBar onSettingsClick={onSettingsClick} onLogoClick={onLogoClick} />
       {!hideSidebar && (
-        <Sidebar
-          expanded={isExpanded}
-          onToggleSidebar={toggle}
-          activeTab={activeTab}
-          onTabChange={onTabChange}
-          currentProfile={currentProfile}
-        />
+        customSidebar || (
+          <Sidebar
+            expanded={isExpanded}
+            onToggleSidebar={toggle}
+            activeTab={activeTab}
+            onTabChange={onTabChange}
+            currentProfile={currentProfile}
+          />
+        )
       )}
       <main
         id="main-scroll-container"

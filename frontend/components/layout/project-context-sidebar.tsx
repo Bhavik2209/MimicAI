@@ -12,7 +12,7 @@ interface ProjectContextSidebarProps {
 export function ProjectContextSidebar({ expanded, projectName, createdDate, targetName }: ProjectContextSidebarProps) {
     if (!expanded) {
         return (
-            <div className="flex flex-col items-center py-6 border-b" style={{ borderColor: "var(--border-soft)" }}>
+            <div className="flex flex-col items-center py-6 border-b" style={{ borderColor: "var(--border)" }}>
                 <div
                     className="flex items-center justify-center rounded-[10px]"
                     style={{ width: 32, height: 32, background: "rgba(12,14,22,0.6)", border: "1px solid rgba(255,255,255,0.07)", color: "var(--gold)" }}
@@ -24,7 +24,7 @@ export function ProjectContextSidebar({ expanded, projectName, createdDate, targ
     }
 
     return (
-        <div className="py-6 px-5 border-b" style={{ borderColor: "var(--border-soft)" }}>
+        <div className="py-6 px-5 border-b" style={{ borderColor: "var(--border)" }}>
             <div className="flex items-center gap-2 mb-4">
                 <div
                     className="flex items-center justify-center rounded-[10px]"
