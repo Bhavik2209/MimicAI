@@ -1,0 +1,31 @@
+﻿@font-face {
+  font-family: 'PP Editorial New';
+  src:
+    url('/fonts/editorial/PPEditorialNew-Regular.woff2') format('woff2'),
+    url('/fonts/editorial/PPEditorialNew-Regular.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'PP Editorial New';
+  src:
+    url('/fonts/editorial/PPEditorialNew-Italic.woff2') format('woff2'),
+    url('/fonts/editorial/PPEditorialNew-Italic.woff') format('woff');
+  font-style: italic;
+  font-weight: 400;
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'PP Editorial New';
+  src:
+    url('/fonts/editorial/PPEditorialNew-UltralightItalic.woff2')
+      format('woff2'),
+    url('/fonts/editorial/PPEditorialNew-UltralightItalic.woff') format('woff');
+  font-style: italic;
+  font-weight: 200;
+  font-display: fallback;
+}
+

@@ -16,7 +16,6 @@ import { SettingsTab } from "@/components/tabs/settings-tab"
 import { CreateProjectFlow } from "@/components/project/create-project-flow"
 import { LandingPage } from "@/components/landing-page"
 import { LandingNav } from "@/components/layout/landing-nav"
-import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
 
 const initialTeslaProfile = {
   name: "Nikola Tesla",
@@ -26,7 +25,7 @@ const initialTeslaProfile = {
   tags: ["Electrical Engineering", "Alternating Current", "Wireless Energy", "Inventor"],
   subtitle:
     "Serbian-American inventor, electrical engineer, and futurist best known for his contributions to the design of the modern alternating current electricity supply system.",
-  eyebrow: "PHYSICIST  ·  1856–1943  ·  INVENTOR",
+  eyebrow: "",
 }
 
 interface ProjectContext {
@@ -114,7 +113,7 @@ export default function Page() {
       initials: newProject.profile.initials,
       category: newProject.profile.category,
       era: newProject.profile.era,
-      eyebrow: `${newProject.profile.category.toUpperCase()}  ·  ${newProject.profile.era}  ·  RESEARCH TARGET`,
+      eyebrow: "",
     })
 
     setView("profile")
@@ -137,7 +136,7 @@ export default function Page() {
       initials: project.profile.initials,
       category: project.profile.category,
       era: project.profile.era,
-      eyebrow: `${project.profile.category.toUpperCase()}  ·  ${project.profile.era}  ·  RESEARCH TARGET`,
+      eyebrow: "",
     })
 
     setView("profile")
@@ -166,7 +165,7 @@ export default function Page() {
 
   if (view === "landing") {
     return (
-      <div className="landing-page" style={{ background: "var(--bg)", minHeight: "100vh" }}>
+      <div className="landing-page" style={{ background: "transparent", minHeight: "100vh" }}>
         <LandingNav onTryMimic={handleGetStarted} />
         <LandingPage onGetStarted={handleGetStarted} />
       </div>
@@ -195,12 +194,7 @@ export default function Page() {
         onTabChange={handleTabChange}
         onSettingsClick={handleSettingsClick}
         onLogoClick={handleLogoClick}
-        customSidebar={
-          <DashboardSidebar
-            activeTab={activeTab === "" ? "projects" : activeTab}
-            onTabChange={handleTabChange}
-          />
-        }
+        hideSidebar
       >
         <HomePage
           projects={projects}

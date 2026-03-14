@@ -51,10 +51,8 @@ interface PersonaChatProps {
 export function PersonaChatTab({ onBack }: PersonaChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [input, setInput] = useState("")
-  const [activeMode, setActiveMode] = useState<"historical" | "interpretive">("historical")
   const [activeSession, setActiveSession] = useState("1")
   const [expandedSources, setExpandedSources] = useState<Record<string, boolean>>({})
-  const [disclaimerExpanded, setDisclaimerExpanded] = useState(false)
   const [typewriterLen, setTypewriterLen] = useState<Record<string, number>>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -158,114 +156,51 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
     >
       {/* Conversation Area */}
       <div className="flex-1 flex flex-col min-w-0" style={{ margin: "0 auto", maxWidth: "1200px" }}>
-        {/* Compact Persona Header — single row, less vertical space */}
+        {/* Persona Header — persona name/avatar + New Session + History */}
         <div
           className="flex items-center justify-between shrink-0"
           style={{
-            minHeight: 56,
-            background: "var(--panel-bg)",
-            borderBottom: "1px solid var(--panel-border)",
+            minHeight: 52,
             padding: "0 24px",
           }}
         >
-          <div className="flex items-center gap-4">
-            {/* Remoded Mobile Menu Toggle */}
-
-            {onBack && (
-              <button
-                onClick={onBack}
-                className="font-sans flex items-center gap-1.5"
+          <div className="flex items-center gap-3">
+            <div
+              className="flex items-center justify-center rounded-full font-serif"
+              style={{
+                width: 32,
+                height: 32,
+                background: "var(--gold-dim)",
+                color: "var(--gold)",
+                fontSize: 13,
+                fontStyle: "italic",
+              }}
+            >
+              NT
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="font-sans"
+                style={{ fontSize: 15, fontWeight: 600, color: "var(--text-1)" }}
+              >
+                Nikola Tesla
+              </span>
+              <span
+                className="font-mono"
                 style={{
-                  fontSize: 13,
-                  fontWeight: 500,
+                  fontSize: 10,
                   color: "var(--text-3)",
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "color var(--transition)",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--gold)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-3)")}
-              >
-                ← Back to profile
-              </button>
-            )}
-
-            {onBack && <div style={{ width: 1, height: 20, background: "var(--border-soft)" }} />}
-
-            <div className="flex items-center gap-3">
-              <div
-                className="flex items-center justify-center rounded-full font-serif"
-                style={{
-                  width: 32,
-                  height: 32,
-                  background: "var(--gold-dim)",
-                  color: "var(--gold)",
-                  fontSize: 13,
-                  fontStyle: "italic",
+                  border: "1px solid var(--border-soft)",
+                  padding: "2px 8px",
+                  borderRadius: 4,
                 }}
               >
-                NT
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="font-sans"
-                  style={{ fontSize: 15, fontWeight: 600, color: "var(--text-1)" }}
-                >
-                  Nikola Tesla
-                </span>
-                <span
-                  className="font-mono"
-                  style={{
-                    fontSize: 10,
-                    color: "var(--text-3)",
-                    border: "1px solid var(--border-soft)",
-                    padding: "2px 8px",
-                    borderRadius: 4,
-                  }}
-                >
-                  Persona
-                </span>
-              </div>
+                Persona
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-0.5">
-            {(["historical", "interpretive"] as const).map((mode) => {
-              const isActive = activeMode === mode
-              return (
-                <button
-                  key={mode}
-                  onClick={() => setActiveMode(mode)}
-                  className="font-sans capitalize rounded-lg px-4 py-2 transition-all"
-                  style={{
-                    fontSize: 13,
-                    fontWeight: isActive ? 500 : 400,
-                    color: isActive ? "var(--text-1)" : "var(--text-3)",
-                    background: isActive ? "var(--control-bg)" : "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = "var(--control-bg)"
-                      e.currentTarget.style.color = "var(--text-2)"
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = "transparent"
-                      e.currentTarget.style.color = "var(--text-3)"
-                    }
-                  }}
-                >
-                  {mode} Mode
-                </button>
-              )
-            })}
-
-            <div style={{ width: 1, height: 20, background: "var(--border-soft)", margin: "0 8px" }} />
-
+          <div className="flex items-center gap-2">
             <button
               className="font-sans flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
               style={{
@@ -368,46 +303,10 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
           </div>
         </div>
 
-        {/* Collapsible Disclaimer — saves vertical space */}
-        <div
-          className="shrink-0 cursor-pointer transition-colors"
-          style={{
-            padding: "8px 24px",
-            background: "var(--control-bg)",
-            borderBottom: "1px solid var(--panel-border)",
-          }}
-          onClick={() => setDisclaimerExpanded(!disclaimerExpanded)}
-          onKeyDown={(e) => e.key === "Enter" && setDisclaimerExpanded(!disclaimerExpanded)}
-          role="button"
-          tabIndex={0}
-          aria-expanded={disclaimerExpanded}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <p
-              className="font-sans"
-              style={{
-                fontSize: 12,
-                fontStyle: "italic",
-                color: "var(--text-3)",
-                flex: 1,
-              }}
-            >
-              {disclaimerExpanded
-                ? "Responses are grounded in verified historical records and documented sources."
-                : "Grounded in verified historical records"}
-            </p>
-            {disclaimerExpanded ? (
-              <ChevronUp size={14} style={{ color: "var(--text-3)", flexShrink: 0 }} />
-            ) : (
-              <ChevronDown size={14} style={{ color: "var(--text-3)", flexShrink: 0 }} />
-            )}
-          </div>
-        </div>
-
-        {/* Messages — no cards, compact, typewriter for persona */}
+        {/* Messages */}
         <div
           className="flex-1 overflow-y-auto flex flex-col"
-          style={{ padding: "16px 24px 12px", gap: 20 }}
+          style={{ padding: "24px 24px 20px", gap: 28 }}
         >
           {messages.map((msg) => {
             if (msg.type === "user") {
@@ -415,20 +314,28 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
                 <div
                   key={msg.id}
                   className="flex flex-col items-end"
-                  style={{ opacity: 1, animation: "msg-enter 200ms ease-out" }}
+                  style={{
+                    opacity: 1,
+                    animation: "msg-enter 200ms ease-out",
+                    padding: "12px 0",
+                  }}
                 >
-                  <p
+                  <div
                     className="font-sans text-right max-w-[85%]"
                     style={{
-                      fontSize: 13,
+                      fontSize: 14,
                       color: "var(--text-1)",
-                      lineHeight: 1.55,
+                      lineHeight: 1.6,
+                      border: "1px solid var(--border-soft)",
+                      borderRadius: 12,
+                      padding: "12px 16px",
+                      background: "var(--surface-1)",
                     }}
                   >
                     {msg.text}
-                  </p>
+                  </div>
                   <span
-                    className="font-mono mt-1"
+                    className="font-mono mt-1.5"
                     style={{ fontSize: 10, color: "var(--text-3)" }}
                   >
                     {msg.timestamp}
@@ -448,6 +355,7 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
                 style={{
                   opacity: 1,
                   animation: "msg-enter 200ms ease-out",
+                  padding: "12px 0",
                 }}
               >
                 <div
@@ -489,29 +397,37 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
                   </div>
                   <div>{renderMessageText(displayText, true)}</div>
                   {msg.sources && msg.sources.length > 0 && (
-                    <div className="mt-2">
+                    <div className="mt-3">
                       <button
                         onClick={() =>
                           setExpandedSources((prev) => ({ ...prev, [msg.id]: !prev[msg.id] }))
                         }
-                        className="font-sans flex items-center gap-1.5 text-left"
+                        className="font-sans flex items-center gap-1 text-left"
                         style={{
-                          fontSize: 11,
+                          fontSize: 10,
+                          fontWeight: 400,
                           color: "var(--text-3)",
+                          opacity: 0.8,
                           background: "transparent",
                           border: "none",
                           cursor: "pointer",
                           padding: 0,
-                          transition: "color var(--transition)",
+                          transition: "color var(--transition), opacity var(--transition)",
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = "var(--gold)")}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-3)")}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = "var(--gold)"
+                          e.currentTarget.style.opacity = "1"
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = "var(--text-3)"
+                          e.currentTarget.style.opacity = "0.8"
+                        }}
                       >
                         <span className="font-mono">Sources ({msg.sources.length})</span>
                         {expandedSources[msg.id] ? (
-                          <ChevronUp size={12} />
+                          <ChevronUp size={10} />
                         ) : (
-                          <ChevronDown size={12} />
+                          <ChevronDown size={10} />
                         )}
                       </button>
                       {expandedSources[msg.id] && (
@@ -536,13 +452,11 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area — compact */}
+        {/* Input Area — floating, no top border/background */}
         <div
           className="shrink-0"
           style={{
-            background: "var(--panel-bg)",
-            borderTop: "1px solid var(--panel-border)",
-            padding: "12px 24px 16px",
+            padding: "16px 24px 24px",
           }}
         >
           <div className="relative max-w-3xl mx-auto flex items-center">
@@ -556,14 +470,15 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
               style={{
                 minHeight: 44,
                 maxHeight: 140,
-                background: "var(--control-bg)",
-                border: "1px solid var(--control-border)",
-                borderRadius: 10,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 12,
                 padding: "10px 48px 10px 16px",
                 fontSize: 13,
                 color: "var(--text-1)",
                 lineHeight: 1.5,
                 outline: "none",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
                 transition: "border-color var(--transition), box-shadow var(--transition)",
               }}
               onFocus={(e) => {
@@ -571,8 +486,8 @@ export function PersonaChatTab({ onBack }: PersonaChatProps) {
                 e.currentTarget.style.boxShadow = "0 0 0 3px var(--gold-glow)"
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = "var(--border)"
-                e.currentTarget.style.boxShadow = "none"
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"
+                e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.15)"
               }}
             />
             <button

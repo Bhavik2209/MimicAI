@@ -5,32 +5,30 @@ import { Sun, Moon, Menu, X } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
 const NAV_LINKS = [
-  { label: "Home", href: "#hero" },
   { label: "How It Works", href: "#how-it-works" },
-  { label: "Personas", href: "#profile-preview" },
-  { label: "Use Cases", href: "#use-cases" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features",     href: "#use-cases" },
+  { label: "Personas",     href: "#profile-preview" },
+  { label: "Pricing",      href: "#pricing" },
 ]
 
 interface LandingNavProps {
   onTryMimic: () => void
 }
 
-export function LandingNav({ onTryMimic }: LandingNavProps) {
-  const [theme, setTheme] = useState<"dark" | "light">("dark")
+export function LandingNav({ onTryMimic }: Readonly<LandingNavProps>) {
+  const [theme, setTheme] = useState<"dark" | "light">("light")
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [logoHovered, setLogoHovered] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem("mimic.theme") as "dark" | "light" | null
-    const initial = saved || "dark"
+    const initial = saved === "dark" ? "dark" : "light"
     setTheme(initial)
-    document.documentElement.setAttribute("data-theme", initial)
+    document.documentElement.dataset.theme = initial
   }, [])
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
+    const onScroll = () => setScrolled(window.scrollY > 12)
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
@@ -38,109 +36,144 @@ export function LandingNav({ onTryMimic }: LandingNavProps) {
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark"
     setTheme(next)
-    document.documentElement.setAttribute("data-theme", next)
+    document.documentElement.dataset.theme = next
     localStorage.setItem("mimic.theme", next)
   }
 
+  const grainUrl =
+    theme === "dark"
+      ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.45' numOctaves='3' stitchTiles='stitch'/%3E%3CfeGaussianBlur stdDeviation='0.8'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9 0 0 0 -4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E")`
+      : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.45' numOctaves='3' stitchTiles='stitch'/%3E%3CfeGaussianBlur stdDeviation='0.8'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9 0 0 0 -4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E")`
+
+  let headerBg: string
+  if (theme === "dark") {
+    headerBg = scrolled ? "rgba(20,20,30,0.88)" : "rgba(20,20,30,0.76)"
+  } else {
+    headerBg = scrolled ? "rgba(238,236,234,0.90)" : "rgba(238,236,234,0.80)"
+  }
+
+  const headerBorder =
+    theme === "dark"
+      ? "rgba(255,255,255,0.08)"
+      : "rgba(25,23,46,0.10)"
+
+  const navShadow =
+    theme === "dark"
+      ? "0 4px 28px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.04)"
+      : "0 4px 20px rgba(25,23,46,0.10), inset 0 1px 0 rgba(255,255,255,0.70)"
+
   return (
-    <header
-      className="fixed top-0 left-0 right-0 z-50"
-      style={{
-        height: 64,
-        background: scrolled ? "var(--panel-bg)" : "transparent",
-        backdropFilter: scrolled ? "blur(28px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(28px)" : "none",
-        borderBottom: scrolled ? "1px solid var(--border-soft)" : "1px solid transparent",
-        transition: "all 0.35s ease",
-      }}
-    >
-      {/* Absolute-positioned logo — does NOT affect nav layout */}
-      {/* Logo lockup — baseline aligned so SVG bottom = text baseline */}
-      <a
-        href="#hero"
-        className="absolute top-0 bottom-0 left-6 md:left-10 flex items-center"
-        style={{ textDecoration: "none", zIndex: 1 }}
-        onMouseEnter={() => setLogoHovered(true)}
-        onMouseLeave={() => setLogoHovered(false)}
+    <>
+      <header
+        className="fixed z-50"
+        style={{
+          top: 16,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "calc(100% - 48px)",
+          maxWidth: 1160,
+          height: 60,
+          background: `${grainUrl}, ${headerBg}`,
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: `1px solid ${headerBorder}`,
+          borderRadius: 12,
+          boxShadow: navShadow,
+          transition: "background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease",
+        }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Logo
-            style={{
-              height: 24,
-              width: "auto",
-              flexShrink: 0,
-              color: "var(--gold)",
-              transition: "transform 0.3s ease",
-              transform: logoHovered ? "scale(1.04)" : "scale(1)",
-            }}
-          />
-          <div className="flex items-center gap-1 font-ui text-[20px] font-bold tracking-tight">
-            <span style={{ color: scrolled ? "var(--text-1)" : "var(--text-1)" }}>Mimic</span>
-            <span style={{ color: "var(--gold)", fontWeight: 400 }}>AI</span>
+        <div
+          className="mx-auto flex items-center justify-between"
+          style={{ height: "100%", maxWidth: 1200, padding: "0 32px" }}
+        >
+          {/* LEFT — Logo + wordmark */}
+          <a
+            href="#hero"
+            className="flex items-center gap-2 shrink-0"
+            style={{ textDecoration: "none" }}
+          >
+            <Logo
+              style={{
+                height: 20,
+                width: "auto",
+                flexShrink: 0,
+                color: "var(--gold)",
+              }}
+            />
+            <span
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 17,
+                fontWeight: 700,
+                letterSpacing: "-0.03em",
+                color: "var(--text-1)",
+              }}
+            >
+              Mimic<span style={{ color: "var(--gold)", fontWeight: 400 }}>AI</span>
+            </span>
+          </a>
+
+          {/* CENTER — Nav links */}
+          <nav className="hidden md:flex items-center gap-7 absolute left-1/2 -translate-x-1/2">
+            {NAV_LINKS.map((link) => (
+              <a key={link.label} href={link.href} className="nav-link">
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
+          {/* RIGHT — Actions */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
+              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+            <button
+              onClick={onTryMimic}
+              className="hidden sm:inline-flex btn btn-primary"
+              style={{ fontSize: 13, padding: "8px 18px" }}
+            >
+              Get started
+            </button>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="flex items-center justify-center w-8 h-8 rounded-md md:hidden transition-all"
+              style={{
+                border: "1.5px solid var(--border)",
+                background: "transparent",
+                color: "var(--text-2)",
+              }}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X size={15} /> : <Menu size={15} />}
+            </button>
           </div>
         </div>
-      </a>
+      </header>
 
-      {/* Center — Nav links (desktop only, perfectly centered) */}
-      <nav
-        className="hidden md:flex items-center justify-center gap-8"
-        style={{ height: "100%" }}
-      >
-        {NAV_LINKS.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            className="font-sans text-sm font-medium transition-colors"
-            style={{ color: "var(--text-2)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-1)" }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-2)" }}
-          >
-            {link.label}
-          </a>
-        ))}
-      </nav>
-
-      {/* Right — absolute-positioned actions */}
-      <div
-        className="absolute top-0 bottom-0 right-6 md:right-10 flex items-center gap-3"
-        style={{ zIndex: 1 }}
-      >
-        <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
-          {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-
-        <button
-          onClick={onTryMimic}
-          className="hidden sm:inline-flex btn btn-primary text-sm px-5 py-2.5"
-        >
-          Try Mimic
-        </button>
-
-        {/* Mobile menu toggle — hidden on md+ */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex items-center justify-center w-9 h-9 border border-soft rounded-[10px] md:hidden transition-all text-text-2 hover:text-gold hover:border-gold hover:bg-gold-dim hover:scale-105"
-          style={{ background: "var(--control-bg)", borderColor: "var(--border-soft)" }}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={16} /> : <Menu size={16} />}
-        </button>
-      </div>
-
-      {/* Mobile nav drawer */}
+      {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden" style={{ top: 64 }}>
-          <div
-            className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+        <div className="fixed inset-0 z-40 md:hidden" style={{ top: 76 }}>
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="absolute inset-0 w-full h-full cursor-default"
+            style={{
+              background: theme === "dark" ? "rgba(0,0,0,0.55)" : "rgba(25,23,46,0.18)",
+              backdropFilter: "blur(3px)",
+              border: "none",
+            }}
             onClick={() => setMobileOpen(false)}
           />
           <nav
-            className="relative flex flex-col gap-1 p-4"
+            className="relative flex flex-col gap-0.5 p-3"
             style={{
-              background: "var(--surface-1)",
-              borderBottom: "1px solid var(--border-soft)",
-              animation: "fadeInUp 0.2s ease-out",
+              background: `${grainUrl}, ${theme === "dark" ? "rgba(20,20,30,0.95)" : "rgba(238,236,234,0.97)"}`,
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: `1px solid ${headerBorder}`,
+              borderRadius: 12,
+              margin: "8px 24px",
+              boxShadow: navShadow,
             }}
           >
             {NAV_LINKS.map((link) => (
@@ -148,23 +181,25 @@ export function LandingNav({ onTryMimic }: LandingNavProps) {
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="font-sans text-base font-medium px-4 py-3 rounded-lg transition-colors"
-                style={{ color: "var(--text-1)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gold-dim)" }}
+                className="text-sm font-medium px-4 py-3 rounded-lg"
+                style={{ color: "var(--text-1)", textDecoration: "none", letterSpacing: "-0.01em" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--control-bg)" }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent" }}
               >
                 {link.label}
               </a>
             ))}
+            <div className="h-px my-2" style={{ background: "var(--border)" }} />
             <button
               onClick={() => { setMobileOpen(false); onTryMimic() }}
-              className="btn btn-primary mt-2 w-full"
+              className="btn btn-primary w-full"
+              style={{ fontSize: 14 }}
             >
-              Try Mimic
+              Get started
             </button>
           </nav>
         </div>
       )}
-    </header>
+    </>
   )
 }

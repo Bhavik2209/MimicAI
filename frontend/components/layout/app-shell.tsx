@@ -45,7 +45,7 @@ export function AppShell({
   return (
     <div
       className="min-h-screen"
-      style={{ background: "var(--bg)", overflow: "hidden" }}
+      style={{ background: "transparent", overflow: "hidden" }}
     >
       <TopBar onSettingsClick={onSettingsClick} onLogoClick={onLogoClick} />
       {!hideSidebar && (

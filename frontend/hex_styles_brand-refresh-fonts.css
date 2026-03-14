@@ -1,0 +1,70 @@
+﻿@font-face {
+  font-family: 'PP Formula SemiExtended';
+  src:
+    url('/fonts/formula/PP-Formula-SemiExtendedBold.woff2') format('woff2'),
+    url('/fonts/formula/PP-Formula-SemiExtendedBold.woff') format('woff');
+  font-style: normal;
+  font-weight: 600;
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'PP Formula';
+  src:
+    url('/fonts/formula/PP-Formula-ExtraBold.woff2') format('woff2'),
+    url('/fonts/formula/PP-Formula-ExtraBold.woff') format('woff');
+  font-style: normal;
+  font-weight: 700;
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'PP Formula';
+  src:
+    url('/fonts/formula/PP-Formula-SemiBold.woff2') format('woff2'),
+    url('/fonts/formula/PP-Formula-SemiBold.woff') format('woff');
+  font-style: normal;
+  font-weight: 500;
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Cinetype';
+  src:
+    url('/fonts/cinetype/GT-Cinetype-Light.woff2') format('woff2'),
+    url('/fonts/cinetype/GT-Cinetype-Light.woff') format('woff');
+  font-style: normal;
+  font-weight: 300;
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Cinetype Mono';
+  src:
+    url('/fonts/cinetype/GT-Cinetype-Mono.woff2') format('woff2'),
+    url('/fonts/cinetype/GT-Cinetype-Mono.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Cinetype';
+  src:
+    url('/fonts/cinetype/GT-Cinetype-Regular.woff2') format('woff2'),
+    url('/fonts/cinetype/GT-Cinetype-Regular.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Cinetype';
+  src:
+    url('/fonts/cinetype/GT-Cinetype-Bold.woff2') format('woff2'),
+    url('/fonts/cinetype/GT-Cinetype-Bold.woff') format('woff');
+  font-style: normal;
+  font-weight: 600;
+  font-display: fallback;
+}
+

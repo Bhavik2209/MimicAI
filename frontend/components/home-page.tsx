@@ -84,101 +84,97 @@ function ProjectCard({
       className="project-card reveal cursor-pointer"
       onClick={onClick}
       style={{
+        background: "#FFFFFF",
         padding: 16,
-        borderRadius: 12,
-        background: "var(--surface-1)",
-        border: "1px solid var(--border-soft)",
-        minHeight: 140,
+        minHeight: 120,
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
         fontFamily: "var(--font-ui), sans-serif",
         position: "relative",
-        transition: "var(--transition)",
       }}
     >
-      <div>
-        {/* TOP ROW: Avatar + Entity/Project info */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-          {/* Avatar block */}
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 8,
-              flexShrink: 0,
-              background: "var(--surface-3)",
-              border: "1px solid var(--border-soft)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 14,
-              fontWeight: 700,
-              color: "var(--text-1)",
-              fontFamily: "var(--font-primary), monospace",
-            }}
-          >
-            {initials}
-          </div>
-
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: "var(--text-1)",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                lineHeight: 1.2,
-              }}
-            >
-              {project.targetName}
-            </div>
-            <div
-              className="font-mono text-[11px]"
-              style={{
-                color: "var(--text-3)",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                marginTop: 2,
-              }}
-            >
-              Project: {project.name}
-            </div>
-          </div>
+      <div style={{ display: "flex", gap: 16, flex: 1 }}>
+        {/* LEFT: Image area */}
+        <div
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: 8,
+            flexShrink: 0,
+            background: "var(--surface-3)",
+            border: "1px solid var(--border-soft)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 20,
+            fontWeight: 700,
+            color: "var(--text-1)",
+            fontFamily: "var(--font-primary), monospace",
+          }}
+        >
+          {initials}
         </div>
 
-        {/* DESCRIPTION */}
-        {description && (
-          <p
-            className="font-ui text-[13px]"
+        {/* RIGHT: Entity info */}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+          {/* Entity name */}
+          <div
             style={{
-              margin: 0,
-              color: "var(--text-3)",
-              lineHeight: 1.5,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--text-1)",
+              whiteSpace: "nowrap",
               overflow: "hidden",
-              marginBottom: 12,
+              textOverflow: "ellipsis",
+              lineHeight: 1.2,
             }}
           >
-            {description}
-          </p>
-        )}
+            {project.targetName}
+          </div>
+
+          {/* Project name */}
+          <div
+            className="font-mono text-[12px]"
+            style={{
+              color: "var(--text-3)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            Project: {project.name}
+          </div>
+
+          {/* Description */}
+          {description && (
+            <p
+              className="font-ui text-[13px]"
+              style={{
+                margin: 0,
+                color: "var(--text-3)",
+                lineHeight: 1.4,
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                marginTop: 4,
+              }}
+            >
+              {description}
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* FOOTER ROW */}
+      {/* BOTTOM: Date and options */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           paddingTop: 12,
+          marginTop: 12,
           borderTop: "1px solid var(--border-soft)",
-          marginTop: "auto"
         }}
       >
         <span
@@ -187,16 +183,6 @@ function ProjectCard({
         >
           {formattedDate}
         </span>
-
-        {/* Status dot */}
-        <div
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: project.status === "archived" ? "var(--text-3)" : "#22C55E"
-          }}
-        />
 
         {/* Menu icon */}
         <div style={{ position: "relative" }} ref={menuRef} onClick={(e) => e.stopPropagation()}>
@@ -222,12 +208,12 @@ function ProjectCard({
                 position: "absolute",
                 right: 0,
                 bottom: "calc(100% + 4px)",
-                background: "var(--surface-1)",
-                border: "1px solid var(--border-soft)",
+                background: "var(--bg)",
+                border: "1.5px solid rgba(25,23,46,0.14)",
                 borderRadius: 8,
                 padding: 4,
                 minWidth: 120,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
                 zIndex: 50,
               }}
             >
@@ -373,8 +359,10 @@ export function HomePage({ projects, onCreateProject, onOpenProject }: HomePageP
         >
           {/* Search Input */}
           <div
-            className="flex items-center gap-2 px-3 h-full rounded-md border"
-            style={{ background: "var(--surface-1)", borderColor: "var(--border-soft)", width: 340 }}
+            className="flex items-center gap-2 px-3 h-full"
+            style={{ background: "rgba(0,0,0,0.04)", border: "1.5px solid transparent", borderRadius: 6, width: 340, transition: "border-color 0.2s" }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(25,23,46,0.20)")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "transparent")}
           >
             <Search size={14} style={{ color: "var(--text-3)", flexShrink: 0 }} />
             <input
@@ -414,11 +402,12 @@ export function HomePage({ projects, onCreateProject, onOpenProject }: HomePageP
           {/* Sort Dropdown */}
           <div className="relative h-full">
             <button
-              className="flex items-center gap-2 font-mono text-[11px] h-full px-3 rounded-md border"
+              className="flex items-center gap-2 font-mono text-[11px] h-full px-3"
               style={{
                 color: "var(--text-2)",
-                background: "var(--surface-1)",
-                borderColor: "var(--border-soft)",
+                background: "rgba(0,0,0,0.04)",
+                border: "1.5px solid transparent",
+                borderRadius: 6,
                 cursor: "pointer",
               }}
               onClick={() => setIsSortOpen(!isSortOpen)}
@@ -435,11 +424,13 @@ export function HomePage({ projects, onCreateProject, onOpenProject }: HomePageP
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setIsSortOpen(false)} />
                 <div
-                  className="absolute right-0 mt-2 py-2 z-50 rounded-lg shadow-lg border"
+                  className="absolute right-0 mt-2 py-2 z-50 shadow-lg"
                   style={{
-                    background: "var(--surface-1)",
-                    borderColor: "var(--border-soft)",
+                    background: "var(--bg)",
+                    border: "1.5px solid rgba(25,23,46,0.14)",
+                    borderRadius: 8,
                     minWidth: 140,
+                    backdropFilter: "blur(12px)",
                   }}
                 >
                   {sortOptions.map((opt) => (
@@ -468,7 +459,7 @@ export function HomePage({ projects, onCreateProject, onOpenProject }: HomePageP
       )}
 
       {/* 3. PROJECT GRID */}
-      <div className="flex-1 overflow-y-auto pb-10 pr-2 -mr-2" style={{ marginTop: 20 }}>
+      <div className="flex-1 overflow-y-auto pb-10 pr-2 -mr-2" style={{ marginTop: 20, paddingTop: 8 }}>
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center text-center py-20 max-w-sm mx-auto">
             <span
