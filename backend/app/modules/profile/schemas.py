@@ -58,4 +58,4 @@ class WikiOut(BaseModel):
     wikipedia_title: str
     intro_summary: str
     sections: List[WikiSectionOut] = []
-    reference_urls: List[str] = []
+    # reference_urls: List[str] = []

@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.research_source import ResearchSource
 
@@ -8,25 +8,18 @@ from app.db.models.research_source import ResearchSource
 async def save_source(
     entity_id: uuid.UUID,
     source_type: str,
+    url: str,
     db: AsyncSession,
     title: str | None = None,
-    url: str | None = None,
-    published_at: datetime | None = None,
-    metadata: dict | None = None,
-) -> ResearchSource:
-    source = ResearchSource(
-        id=uuid.uuid4(),
-        entity_id=entity_id,
-        title=title,
-        url=url,
-        source_type=source_type,
-        published_at=published_at,
-        metadata_=metadata,
+) -> None:
+    """Upsert a source URL — silently skips if (entity_id, source_type, url) already exists."""
+    stmt = (
+        pg_insert(ResearchSource)
+        .values(id=uuid.uuid4(), entity_id=entity_id, source_type=source_type, url=url, title=title)
+        .on_conflict_do_nothing(constraint="research_sources_entity_source_url_key")
     )
-    db.add(source)
+    await db.execute(stmt)
     await db.commit()
-    await db.refresh(source)
-    return source
 
 
 async def get_sources_by_entity(

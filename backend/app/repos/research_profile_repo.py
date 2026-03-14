@@ -15,12 +15,10 @@ _SECTION_MAP = {
 
 
 async def create_profile(entity_id: uuid.UUID, db: AsyncSession) -> ResearchProfile:
-    """Create an empty profile shell when a research job starts."""
+    """Create an empty research profile for the given entity."""
     profile = ResearchProfile(
         id=uuid.uuid4(),
         entity_id=entity_id,
-        status="pending",
-        progress=0,
     )
     db.add(profile)
     await db.commit()
@@ -33,20 +31,6 @@ async def get_profile(entity_id: uuid.UUID, db: AsyncSession) -> ResearchProfile
         select(ResearchProfile).where(ResearchProfile.entity_id == entity_id)
     )
     return result.scalar_one_or_none()
-
-
-async def update_profile_status(
-    entity_id: uuid.UUID, status: str, progress: int, db: AsyncSession
-) -> ResearchProfile | None:
-    profile = await get_profile(entity_id, db)
-    if not profile:
-        return None
-    profile.status = status
-    profile.progress = progress
-    profile.last_research_update = datetime.now(timezone.utc)
-    await db.commit()
-    await db.refresh(profile)
-    return profile
 
 
 async def update_profile_section(

@@ -7,6 +7,7 @@ from app.db.models.chat_session import ChatSession
 async def create_session(
     user_id: uuid.UUID,
     project_id: uuid.UUID,
+    entity_id: uuid.UUID,
     db: AsyncSession,
     title: str | None = None,
 ) -> ChatSession:
@@ -14,6 +15,7 @@ async def create_session(
         id=uuid.uuid4(),
         user_id=user_id,
         project_id=project_id,
+        entity_id=entity_id,
         title=title,
     )
     db.add(session)

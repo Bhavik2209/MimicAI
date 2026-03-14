@@ -83,31 +83,15 @@ async def _fetch_sections(title: str) -> List[Dict[str, str]]:
     return sections
 
 
-async def _fetch_external_links(title: str) -> List[str]:
-    """Fetch external reference URLs from the article."""
-    data = await _safe_request(settings.wikipedia_api_url, {
-        "action": "query",
-        "titles": title,
-        "format": "json",
-        "prop": "extlinks",
-        "ellimit": 100,
-        "redirects": 1,
-    })
-    pages = data.get("query", {}).get("pages", {})
-    page = next(iter(pages.values()), {})
-    return [link.get("*", "") for link in page.get("extlinks", []) if link.get("*")]
-
-
 async def wiki_agent(qid: str) -> Dict[str, Any]:
     """
     Fetch Wikipedia content for a Wikidata entity ID.
-    Returns intro, full sections, and external reference URLs.
+    Returns intro and full sections.
     """
     title = await _get_wikipedia_title(qid)
-    intro, sections, references = await asyncio.gather(
+    intro, sections = await asyncio.gather(
         _fetch_intro(title),
         _fetch_sections(title),
-        _fetch_external_links(title),
     )
 
     return {
@@ -115,5 +99,6 @@ async def wiki_agent(qid: str) -> Dict[str, Any]:
         "wikipedia_title": title,
         "intro_summary": intro,
         "sections": sections,
-        "reference_urls": references,
+        # Reference URLs intentionally disabled for now.
+        # "reference_urls": references,
     }

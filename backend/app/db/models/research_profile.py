@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, Text, Integer, DateTime, ForeignKey
+from sqlalchemy import Text, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
@@ -23,10 +23,6 @@ class ResearchProfile(Base):
     timeline: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     controversies: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     quotes: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-
-    # Status tracking for the async research pipeline
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
-    progress: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     last_research_update: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
