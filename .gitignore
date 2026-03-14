@@ -5,3 +5,7 @@ exp
 .env
 __pycache__
 *.pyc
+
+# Throwaway test/debug scripts with credentials
+backend/test_*.py
+tests/test_*.py
