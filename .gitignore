@@ -9,3 +9,7 @@ __pycache__
 # Throwaway test/debug scripts with credentials
 backend/test_*.py
 tests/test_*.py
+db_schema.sql
+
+backend2
+frontend/public/doodle_icons
