@@ -47,4 +47,3 @@ class EntityConfirmResponse(BaseModel):
 	openalex_candidate: bool = False
 	orcid_ids: list[str] = Field(default_factory=list)
 	status: str = "confirmed"
-
