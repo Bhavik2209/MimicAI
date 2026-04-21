@@ -57,6 +57,7 @@ class Settings(BaseModel):
     memory_context_max_chars: int = 900
     retrieved_context_max_chars: int = 1600
     qdrant_chat_memory_enabled: bool = True
+    run_startup_schema_sync: bool = True
 
 
 settings = Settings(
@@ -122,5 +123,6 @@ settings = Settings(
     memory_context_max_chars=int(os.getenv("MEMORY_CONTEXT_MAX_CHARS", "900")),
     retrieved_context_max_chars=int(os.getenv("RETRIEVED_CONTEXT_MAX_CHARS", "1600")),
     qdrant_chat_memory_enabled=os.getenv("QDRANT_CHAT_MEMORY_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"},
+    run_startup_schema_sync=os.getenv("RUN_STARTUP_SCHEMA_SYNC", "true").strip().lower() in {"1", "true", "yes", "on"},
 )
 

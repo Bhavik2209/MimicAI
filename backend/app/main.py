@@ -5,6 +5,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 from app.db.base import Base
 from app.db.qdrant import close_qdrant, get_qdrant_client, init_qdrant
 from app.db.session import engine
@@ -42,8 +43,9 @@ app.include_router(user_router)
 @app.on_event("startup")
 async def startup_event() -> None:
     """Initialize external clients on service startup."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    if settings.run_startup_schema_sync:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
     try:
         init_qdrant()
