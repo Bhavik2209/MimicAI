@@ -1,5 +1,10 @@
 """Utility helpers for Wikidata requests and claim extraction."""
 
+import asyncio
+import logging
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+
 import httpx
 
 from app.config import settings
@@ -20,14 +25,66 @@ ACADEMIC_OCCUPATION_SET = {
 	"Q901",  # scientist
 }
 
+logger = logging.getLogger(__name__)
+
+WIKIMEDIA_HEADERS = {
+	"User-Agent": "MimicAI/1.0 (+https://github.com/Bhavik2209/MimicAI)",
+}
+
+
+def _parse_retry_after_seconds(response: httpx.Response) -> float | None:
+	"""Parse Retry-After header as seconds (int or HTTP date)."""
+	retry_after = response.headers.get("Retry-After")
+	if not retry_after:
+		return None
+
+	if retry_after.isdigit():
+		return max(0.0, float(retry_after))
+
+	try:
+		retry_at = parsedate_to_datetime(retry_after)
+		if retry_at.tzinfo is None:
+			retry_at = retry_at.replace(tzinfo=timezone.utc)
+		delta = (retry_at - datetime.now(timezone.utc)).total_seconds()
+		return max(0.0, delta)
+	except Exception:
+		return None
+
 
 async def safe_request(url: str, params: dict | None = None) -> dict:
 	"""Execute a safe HTTP GET request to Wikidata API."""
-	headers = {"User-Agent": "MimicAI/1.0 (your_email@example.com)"}
-	async with httpx.AsyncClient() as client:
-		response = await client.get(url, params=params, headers=headers, timeout=10.0)
-		response.raise_for_status()
-		return response.json()
+	max_attempts = 4
+	base_backoff_seconds = 1.0
+
+	async with httpx.AsyncClient(timeout=12.0, headers=WIKIMEDIA_HEADERS) as client:
+		for attempt in range(1, max_attempts + 1):
+			try:
+				response = await client.get(url, params=params)
+				response.raise_for_status()
+				return response.json()
+			except httpx.HTTPStatusError as exc:
+				status_code = exc.response.status_code
+				retryable = status_code in {429, 500, 502, 503, 504}
+				if not retryable or attempt == max_attempts:
+					raise
+
+				retry_after = _parse_retry_after_seconds(exc.response)
+				backoff = retry_after if retry_after is not None else base_backoff_seconds * (2 ** (attempt - 1))
+				logger.warning(
+					"Wikidata request throttled/failed (status=%s). Retrying in %.1fs (attempt %s/%s)",
+					status_code,
+					backoff,
+					attempt,
+					max_attempts,
+				)
+				await asyncio.sleep(backoff)
+			except httpx.RequestError:
+				if attempt == max_attempts:
+					raise
+				await asyncio.sleep(base_backoff_seconds * (2 ** (attempt - 1)))
+
+	# This is unreachable because we either return or raise above.
+	raise RuntimeError("Wikidata request retry loop exhausted")
 
 
 async def wikidata_search(query: str) -> list:

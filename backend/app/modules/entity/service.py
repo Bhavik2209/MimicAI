@@ -1,5 +1,13 @@
 """Business logic for entity search and identity confirmation."""
 
+from uuid import UUID
+
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.modules.entity.schemas import EntityCreateRequest, EntityCreateResponse
+from app.repos.entity_repo import create_entity, get_entity_by_id, get_entity_by_wikidata_id
+
 from .schemas import EntityCandidate, EntityConfirmResponse, LabelItem
 from .utils import (
 	ACADEMIC_OCCUPATION_SET,
@@ -11,6 +19,49 @@ from .utils import (
 	fetch_labels,
 	wikidata_search,
 )
+
+
+async def create_entity_record(
+	db: AsyncSession,
+	entity_id: str,
+	payload: EntityCreateRequest,
+) -> EntityCreateResponse:
+	"""Create one entity row after consistency and uniqueness checks."""
+	if payload.wikidata_id != entity_id:
+		raise HTTPException(
+			status_code=status.HTTP_400_BAD_REQUEST,
+			detail="Path entity_id and body wikidata_id do not match",
+		)
+
+	if await get_entity_by_id(db, payload.id):
+		raise HTTPException(
+			status_code=status.HTTP_409_CONFLICT,
+			detail="Entity id already exists",
+		)
+
+	if await get_entity_by_wikidata_id(db, payload.wikidata_id):
+		raise HTTPException(
+			status_code=status.HTTP_409_CONFLICT,
+			detail="Entity wikidata_id already exists",
+		)
+
+	entity = await create_entity(
+		db=db,
+		entity_id=payload.id,
+		wikidata_id=payload.wikidata_id,
+		name=payload.name,
+		description=payload.description,
+		image_url=payload.image_url,
+	)
+	return EntityCreateResponse(
+		id=entity.id,
+		wikidata_id=entity.wikidata_id,
+		name=entity.name,
+		description=entity.description,
+		image_url=entity.image_url,
+		created_at=entity.created_at,
+		updated_at=entity.updated_at,
+	)
 
 
 async def resolve_entity_identity(qid: str) -> EntityConfirmResponse:

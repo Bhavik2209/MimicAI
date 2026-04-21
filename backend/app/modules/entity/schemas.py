@@ -1,5 +1,8 @@
 """API schemas for entity module routes."""
 
+from datetime import datetime
+from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 
@@ -47,3 +50,25 @@ class EntityConfirmResponse(BaseModel):
 	openalex_candidate: bool = False
 	orcid_ids: list[str] = Field(default_factory=list)
 	status: str = "confirmed"
+
+
+class EntityCreateRequest(BaseModel):
+	"""Input payload to create one entity in DB."""
+
+	id: UUID
+	wikidata_id: str
+	name: str
+	description: str | None = None
+	image_url: str | None = None
+
+
+class EntityCreateResponse(BaseModel):
+	"""Created entity response payload."""
+
+	id: UUID
+	wikidata_id: str
+	name: str
+	description: str | None = None
+	image_url: str | None = None
+	created_at: datetime
+	updated_at: datetime
