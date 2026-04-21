@@ -1,62 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { AltArrowDown } from "@/components/ui/solar-icons"
+import type { ResearchRunResponse } from "@/lib/api"
 
-const controversies = [
-  {
-    title: "War of Currents — Edison Rivalry",
-    severity: "high" as const,
-    years: "1886–1893",
-    summary:
-      "The bitter technological and commercial battle between Tesla's alternating current (AC) system and Edison's direct current (DC) system involved public propaganda campaigns, including the electrocution of animals to discredit AC power. Edison's camp used fear tactics, while Tesla and Westinghouse pursued engineering superiority.",
-    facts: [
-      "Edison publicly electrocuted animals using AC to demonstrate its 'dangers'",
-      "The first electric chair used AC current, lobbied for by Edison supporters",
-      "Tesla's AC system ultimately won, powering the 1893 World's Fair",
-    ],
-    sources: ["Seifer, M. 'Wizard: The Life and Times of Nikola Tesla'", "Jonnes, J. 'Empires of Light'"],
-  },
-  {
-    title: "Extraterrestrial Communication Claims",
-    severity: "medium" as const,
-    years: "1899–1901",
-    summary:
-      "During his Colorado Springs experiments, Tesla claimed to have received signals from intelligent extraterrestrial life. The scientific community was deeply skeptical, and the claims damaged his credibility among peers who otherwise respected his engineering achievements.",
-    facts: [
-      "Tesla reported receiving repetitive signals he attributed to Mars in 1899",
-      "Modern analysis suggests the signals were likely from Jupiter's magnetosphere",
-      "The claims contributed to his growing reputation for eccentricity",
-    ],
-    sources: ["Carlson, W.B. 'Tesla: Inventor of the Electrical Age'"],
-  },
-  {
-    title: "Death Ray / Teleforce Weapon",
-    severity: "medium" as const,
-    years: "1934–1943",
-    summary:
-      "Tesla publicly announced a particle beam weapon he called 'Teleforce,' which the press sensationalized as a 'death ray.' He offered the technology to multiple governments. After his death, the FBI seized his papers, fueling decades of conspiracy theories about suppressed weapons technology.",
-    facts: [
-      "Tesla described a directed-energy weapon using charged particles",
-      "The FBI confiscated his papers immediately after his death in 1943",
-      "Documents were eventually declassified and found to contain theoretical notes, not working plans",
-    ],
-    sources: ["FBI FOIA archive, 'Nikola Tesla Papers'", "Seifer, M. 'Wizard'"],
-  },
-  {
-    title: "Eugenics Statements",
-    severity: "high" as const,
-    years: "1935–1937",
-    summary:
-      "In his later years, Tesla made statements supporting eugenics, including the forced sterilization of 'unfit' individuals. These views, common among intellectuals of his era, remain deeply troubling and inconsistent with his otherwise humanistic vision of technology serving all people.",
-    facts: [
-      "Tesla published eugenic views in a 1935 Liberty magazine article",
-      "He advocated for a 'new eugenics' guided by scientific principles",
-      "These views were widespread among early 20th-century intellectuals but are now universally condemned",
-    ],
-    sources: ["Liberty Magazine, 1935", "Carlson, W.B. 'Tesla: Inventor of the Electrical Age'"],
-  },
-]
+const controversies: Array<{
+  title: string
+  severity: "high" | "medium" | "low"
+  years: string
+  summary: string
+  facts: string[]
+  sources: string[]
+}> = []
 
 const severityColor = {
   high: "var(--red)",
@@ -64,8 +19,34 @@ const severityColor = {
   low: "var(--text-3)",
 }
 
-export function ControversiesTab() {
+interface ControversiesTabProps {
+  researchData?: ResearchRunResponse | null
+}
+
+export function ControversiesTab({ researchData }: Readonly<ControversiesTabProps>) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  const apiItems = ((researchData?.analysis?.display?.controversy_section?.items ?? []) as any[])
+  const apiControversies = apiItems.map((item: any) => {
+    const evidence = (item?.evidence ?? []) as Array<{ snippet?: string; score?: number; source_url?: string }>
+    const maxScore = evidence.length
+      ? Math.max(...evidence.map((e) => Number(e.score || 0)))
+      : 0
+    let severity: "high" | "medium" | "low" = "low"
+    if (maxScore >= 0.75) severity = "high"
+    else if (maxScore >= 0.45) severity = "medium"
+
+    return {
+      title: String(item?.question || "Controversy"),
+      severity,
+      years: "Research",
+      summary: String(evidence[0]?.snippet || "No summary available."),
+      facts: evidence.slice(0, 3).map((e) => String(e.snippet || "")).filter(Boolean),
+      sources: Array.from(new Set(evidence.map((e) => e.source_url).filter(Boolean))) as string[],
+    }
+  })
+
+  const displayedControversies = apiControversies.length ? apiControversies : controversies
 
   return (
     <div style={{ maxWidth: 820, margin: "0 auto", padding: 40 }}>
@@ -81,11 +62,25 @@ export function ControversiesTab() {
 
       {/* Accordion List */}
       <div>
-        {controversies.map((item, i) => {
+        {displayedControversies.length === 0 ? (
+          <div
+            className="font-sans"
+            style={{
+              fontSize: 14,
+              color: "var(--text-3)",
+              padding: "16px 20px",
+              border: "1px solid var(--border-soft)",
+              borderRadius: 10,
+            }}
+          >
+            No controversies available yet for this profile.
+          </div>
+        ) : null}
+        {displayedControversies.map((item, i) => {
           const isOpen = openIndex === i
           return (
             <div
-              key={item.title}
+              key={`${item.title}-${i}`}
               className="mb-2 overflow-hidden"
               style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
             >
@@ -127,7 +122,7 @@ export function ControversiesTab() {
                 >
                   {item.years}
                 </span>
-                <ChevronDown
+                 <AltArrowDown
                   size={16}
                   style={{
                     color: "var(--text-3)",
@@ -168,9 +163,9 @@ export function ControversiesTab() {
                       KEY FACTS
                     </span>
                     <ul className="mt-2 flex flex-col gap-2">
-                      {item.facts.map((fact, fi) => (
+                      {item.facts.map((fact) => (
                         <li
-                          key={fi}
+                          key={fact}
                           className="flex gap-2 font-sans"
                           style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.6 }}
                         >
@@ -202,9 +197,9 @@ export function ControversiesTab() {
                       SOURCES
                     </span>
                     <div className="flex flex-col gap-1 mt-2">
-                      {item.sources.map((src, si) => (
+                      {item.sources.map((src) => (
                         <span
-                          key={si}
+                          key={src}
                           className="font-mono"
                           style={{ fontSize: 12, color: "var(--teal)" }}
                         >

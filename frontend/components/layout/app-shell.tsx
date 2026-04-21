@@ -9,6 +9,7 @@ interface AppShellProps {
   children: ReactNode
   activeTab: string
   onTabChange: (tab: string) => void
+  visibleTabs?: Partial<Record<string, boolean>>
   onSettingsClick?: () => void
   onLogoClick?: () => void
   currentProfile?: {
@@ -25,12 +26,16 @@ interface AppShellProps {
   sidebarCollapsedDefault?: boolean
   hideSidebar?: boolean
   customSidebar?: ReactNode
+  topBarBackground?: string
+  mainBackground?: string
+  sidebarBackground?: string
 }
 
 export function AppShell({
   children,
   activeTab,
   onTabChange,
+  visibleTabs,
   onSettingsClick,
   onLogoClick,
   currentProfile,
@@ -38,16 +43,26 @@ export function AppShell({
   sidebarCollapsedDefault = false,
   hideSidebar = false,
   customSidebar,
-}: AppShellProps) {
+  topBarBackground,
+  mainBackground,
+  sidebarBackground,
+}: Readonly<AppShellProps>) {
   const { expanded, toggle } = useSidebar()
   const isExpanded = sidebarCollapsedDefault ? false : expanded
+
+  let mainMarginLeft: string | number = 0
+  if (!hideSidebar) {
+    mainMarginLeft = isExpanded ? "var(--sidebar-w)" : 56
+  }
 
   return (
     <div
       className="min-h-screen"
-      style={{ background: "transparent", overflow: "hidden" }}
+      style={{
+        overflow: "hidden",
+      }}
     >
-      <TopBar onSettingsClick={onSettingsClick} onLogoClick={onLogoClick} />
+      <TopBar onSettingsClick={onSettingsClick} onLogoClick={onLogoClick} background={topBarBackground} />
       {!hideSidebar && (
         customSidebar || (
           <Sidebar
@@ -55,6 +70,8 @@ export function AppShell({
             onToggleSidebar={toggle}
             activeTab={activeTab}
             onTabChange={onTabChange}
+            background={sidebarBackground}
+            visibleTabs={visibleTabs}
             currentProfile={currentProfile}
           />
         )
@@ -63,9 +80,10 @@ export function AppShell({
         id="main-scroll-container"
         className="relative"
         style={{
-          marginLeft: hideSidebar ? 0 : (isExpanded ? "var(--sidebar-w)" : 56),
+          marginLeft: mainMarginLeft,
           paddingTop: "var(--topbar-h)",
           height: "100vh",
+          background: mainBackground || "var(--bg)",
           overflowY: "auto",
           transition: "margin-left 220ms cubic-bezier(0.4, 0, 0.2, 1)",
         }}

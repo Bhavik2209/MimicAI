@@ -1,21 +1,22 @@
 import {
-  BookOpen,
-  Brain,
-  Network,
-  AlertCircle,
-  Newspaper,
-  Library,
-  MessageSquare,
-  PanelLeftClose,
-  PanelLeft,
-  Settings,
-} from "lucide-react"
+  Widget,     // Overview — profile view
+  UserId,          // Personality — individual traits
+  SortByTime,      // Timeline — chronologically ordered events
+  Siren,           // News — editorial feed, current events
+  Suitcase,        // Work — career, professional output
+  Documents,       // Resources — library of reference material
+  ChatLine,        // Persona Chat — a live conversation bubble
+  Settings,        // Settings — configuration
+  MaximizeSquare2, // Collapse/expand sidebar control
+} from "@/components/ui/solar-icons"
 
 interface SidebarProps {
   expanded: boolean
   onToggleSidebar: () => void
   activeTab: string
   onTabChange: (tab: string) => void
+  background?: string
+  visibleTabs?: Partial<Record<string, boolean>>
   currentProfile?: {
     name: string
     category: string
@@ -28,22 +29,22 @@ const navGroups = [
   {
     label: "PROFILE",
     items: [
-      { id: "overview", label: "Overview", icon: BookOpen },
-      { id: "personality", label: "Personality", icon: Brain },
-      { id: "timeline", label: "Timeline", icon: Network },
+      { id: "overview",     label: "Overview",     icon: Widget },
+      { id: "personality",  label: "Personality",  icon: UserId },
+      { id: "timeline",     label: "Timeline",     icon: SortByTime },
     ],
   },
   {
     label: "INSIGHTS",
     items: [
-      { id: "controversies", label: "Controversies", icon: AlertCircle },
-      { id: "news", label: "News", icon: Newspaper },
-      { id: "resources", label: "Resources", icon: Library },
+      { id: "news",         label: "News",         icon: Siren },
+      { id: "work",         label: "Work",         icon: Suitcase },
+      { id: "resources",    label: "Resources",    icon: Documents },
     ],
   },
   {
     label: "INTERACTION",
-    items: [{ id: "chat", label: "Persona Chat", icon: MessageSquare }],
+    items: [{ id: "chat", label: "Persona Chat", icon: ChatLine }],
   },
 ]
 
@@ -52,8 +53,17 @@ export function Sidebar({
   onToggleSidebar,
   activeTab,
   onTabChange,
+  background,
+  visibleTabs,
   currentProfile,
-}: SidebarProps) {
+}: Readonly<SidebarProps>) {
+  const filteredNavGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => visibleTabs?.[item.id] !== false),
+    }))
+    .filter((group) => group.items.length > 0)
+
   return (
     <aside
       className="fixed left-0 flex flex-col overflow-hidden"
@@ -61,7 +71,7 @@ export function Sidebar({
         top: "var(--topbar-h)",
         height: "calc(100vh - var(--topbar-h))",
         width: expanded ? "var(--sidebar-w)" : 56,
-        background: "var(--bg)",
+        background: background || "var(--bg)",
         borderRight: "1px solid var(--border)",
         transition: "width 220ms cubic-bezier(0.4, 0, 0.2, 1)",
         zIndex: 40,
@@ -69,7 +79,7 @@ export function Sidebar({
     >
       {/* Navigation Groups */}
       <nav className="flex-1 overflow-y-auto py-4" style={{ flex: 1, minHeight: 0, paddingLeft: 4, paddingRight: 4 }}>
-        {navGroups.map((group) => (
+        {filteredNavGroups.map((group) => (
           <div key={group.label}>
             {expanded && (
               <div
@@ -99,7 +109,8 @@ export function Sidebar({
                     gap: expanded ? 10 : 0,
                     padding: expanded ? "9px 16px 9px 20px" : "9px 0",
                     justifyContent: expanded ? "flex-start" : "center",
-                    background: isActive ? "var(--gold-dim)" : "transparent",
+                    background: isActive ? "var(--sidebar-active-bg)" : "transparent",
+                    boxShadow: isActive ? "inset 0 0 0 1px var(--sidebar-active-border, transparent)" : "none",
                     transition: "var(--transition)",
                     cursor: "pointer",
                     border: "none",
@@ -112,7 +123,7 @@ export function Sidebar({
                     if (!isActive)
                       e.currentTarget.style.background = "transparent"
                   }}
-                  title={!expanded ? item.label : undefined}
+                  title={expanded ? undefined : item.label}
                 >
                   {/* Gold active indicator */}
                   {isActive && (
@@ -127,8 +138,9 @@ export function Sidebar({
                   )}
                   <Icon
                     size={18}
+                    weight={isActive ? "Broken" : "Linear"}
+                    color={isActive ? "var(--gold)" : "var(--text-3)"}
                     style={{
-                      color: isActive ? "var(--text-1)" : "var(--text-3)",
                       transition: "var(--transition)",
                       flexShrink: 0,
                     }}
@@ -183,11 +195,13 @@ export function Sidebar({
           }}
           aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
         >
-          {expanded ? (
-            <PanelLeftClose size={16} />
-          ) : (
-            <PanelLeft size={16} />
-          )}
+          {/* MaximizeSquare2 flipped — collapse = pointing inward, expand = pointing outward */}
+          <MaximizeSquare2
+            size={16}
+            weight="Linear"
+            color="currentColor"
+            style={{ transform: expanded ? "none" : "scaleX(-1)", transition: "transform 0.2s" }}
+          />
         </button>
       </div>
 
@@ -206,7 +220,8 @@ export function Sidebar({
             gap: expanded ? 10 : 0,
             padding: expanded ? "9px 16px 9px 20px" : "9px 0",
             justifyContent: expanded ? "flex-start" : "center",
-            background: activeTab === "settings" ? "var(--gold-dim)" : "transparent",
+            background: activeTab === "settings" ? "var(--sidebar-active-bg)" : "transparent",
+            boxShadow: activeTab === "settings" ? "inset 0 0 0 1px var(--sidebar-active-border, transparent)" : "none",
             transition: "var(--transition)",
             cursor: "pointer",
             border: "none",
@@ -219,7 +234,7 @@ export function Sidebar({
             if (activeTab !== "settings")
               e.currentTarget.style.background = "transparent"
           }}
-          title={!expanded ? "Settings" : undefined}
+          title={expanded ? undefined : "Settings"}
         >
           {activeTab === "settings" && (
             <span
@@ -233,8 +248,9 @@ export function Sidebar({
           )}
           <Settings
             size={18}
+            weight={activeTab === "settings" ? "Broken" : "Linear"}
+            color={activeTab === "settings" ? "var(--gold)" : "var(--text-3)"}
             style={{
-              color: activeTab === "settings" ? "var(--text-1)" : "var(--text-3)",
               transition: "var(--transition)",
               flexShrink: 0,
             }}

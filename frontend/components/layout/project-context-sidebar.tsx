@@ -1,6 +1,6 @@
 "use client"
 
-import { Folder, Calendar, User } from "lucide-react"
+import { FolderWithFiles, CalendarMark, UserRounded } from "@/components/ui/solar-icons"
 
 interface ProjectContextSidebarProps {
     expanded: boolean
@@ -17,7 +17,8 @@ export function ProjectContextSidebar({ expanded, projectName, createdDate, targ
                     className="flex items-center justify-center rounded-[10px]"
                     style={{ width: 32, height: 32, background: "rgba(12,14,22,0.6)", border: "1px solid rgba(255,255,255,0.07)", color: "var(--gold)" }}
                 >
-                    <Folder size={16} />
+                    {/* FolderWithFiles = research project that contains documents/data */}
+                    <FolderWithFiles size={16} weight="BoldDuotone" color="var(--gold)" />
                 </div>
             </div>
         )
@@ -30,7 +31,7 @@ export function ProjectContextSidebar({ expanded, projectName, createdDate, targ
                     className="flex items-center justify-center rounded-[10px]"
                     style={{ width: 20, height: 20, background: "rgba(12,14,22,0.6)", border: "1px solid rgba(255,255,255,0.07)", color: "var(--gold)" }}
                 >
-                    <Folder size={12} />
+                    <FolderWithFiles size={12} weight="Broken" color="var(--gold)" />
                 </div>
                 <span className="font-mono text-[10px] uppercase tracking-widest" style={{ color: "var(--text-3)" }}>
                     Project Context
@@ -46,11 +47,13 @@ export function ProjectContextSidebar({ expanded, projectName, createdDate, targ
 
                 <div className="space-y-2">
                     <div className="flex items-center gap-2 text-[11px]">
-                        <Calendar size={12} style={{ color: "var(--text-3)" }} />
+                        {/* CalendarMark = a date that's been pinned/marked — creation date */}
+                        <CalendarMark size={12} weight="Linear" color="var(--text-3)" />
                         <span style={{ color: "var(--text-2)" }}>{createdDate}</span>
                     </div>
                     <div className="flex items-center gap-2 text-[11px]">
-                        <User size={12} style={{ color: "var(--text-3)" }} />
+                        {/* UserRounded = the entity/person being researched */}
+                        <UserRounded size={12} weight="Linear" color="var(--text-3)" />
                         <span style={{ color: "var(--text-2)" }}>{targetName}</span>
                     </div>
                 </div>

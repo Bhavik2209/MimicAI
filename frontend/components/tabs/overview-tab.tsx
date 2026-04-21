@@ -1,283 +1,374 @@
 "use client"
 
-import { Zap, Globe, Lightbulb } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Letter, Suitcase, Camera, Global, PlayCircle, UsersGroupTwoRounded } from "@/components/ui/solar-icons"
 
-const timeline = [
-  { year: "1856", title: "Born in Smiljan", desc: "Born in the Austrian Empire (modern-day Croatia) to a Serbian family.", featured: false },
-  { year: "1884", title: "Arrives in America", desc: "Immigrated to the United States with little more than a letter of recommendation to Thomas Edison.", featured: true },
-  { year: "1887", title: "Tesla Electric Company", desc: "Founded his own company, developing his alternating current induction motor and transformer patents.", featured: false },
-  { year: "1891", title: "Tesla Coil Invented", desc: "Invented the Tesla coil, a resonant transformer circuit used to produce high-voltage, low-current electricity.", featured: true },
-  { year: "1893", title: "World's Columbian Exposition", desc: "Demonstrated AC power at the Chicago World's Fair, proving its superiority over DC.", featured: false },
-  { year: "1899", title: "Colorado Springs Experiments", desc: "Conducted high-voltage experiments, claimed to have received extraterrestrial radio signals.", featured: true },
-  { year: "1943", title: "Death in New York", desc: "Died alone in Room 3327 of the New Yorker Hotel at age 86.", featured: false },
-]
+import type { ResearchRunResponse } from "@/lib/api"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
-const achievements = [
-  { icon: Zap, title: "Alternating Current", desc: "Developed the polyphase AC system that powers the modern world." },
-  { icon: Globe, title: "Wireless Communication", desc: "Pioneered wireless energy transmission and radio technology." },
-  { icon: Lightbulb, title: "Tesla Coil", desc: "Invented the resonant transformer circuit still used in radio technology." },
-]
+const PREVIEW_PARAGRAPH_COUNT = 2
 
-const impacts = [
-  { label: "Electrical Engineering", pct: 95 },
-  { label: "Wireless Technology", pct: 88 },
-  { label: "Energy Systems", pct: 82 },
-  { label: "Theoretical Physics", pct: 65 },
-  { label: "Popular Culture", pct: 72 },
-]
+function splitIntoSentences(text: string): string[] {
+  return text
+    .replaceAll(/\s+/g, " ")
+    .trim()
+    .match(/(?:[^.!?]+[.!?]+[\]"')]*|[^.!?]+$)/g)
+    ?.map((sentence) => sentence.trim())
+    .filter(Boolean) || []
+}
 
-export function OverviewTab() {
+function chunkSentences(sentences: string[], chunkSize = 3): string[] {
+  const chunks: string[] = []
+  for (let i = 0; i < sentences.length; i += chunkSize) {
+    chunks.push(sentences.slice(i, i + chunkSize).join(" "))
+  }
+  return chunks
+}
+
+function normalizeParagraphs(text?: string): string[] {
+  if (!text) return []
+
+  const sentences = splitIntoSentences(text)
+  if (!sentences.length) return [text]
+
+  return chunkSentences(sentences, 3)
+}
+
+function toSectionId(sectionName: string, index: number): string {
+  const slug = sectionName.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-").replaceAll(/(^-|-$)/g, "")
+  return slug ? `${slug}-${index}` : `section-${index}`
+}
+
+function ensureUrl(value: string): string {
+  if (!value) return ""
+  if (value.startsWith("http://") || value.startsWith("https://")) return value
+  return `https://${value}`
+}
+
+interface OverviewTabProps {
+  researchData?: ResearchRunResponse | null
+}
+
+function formatLabelValue(label: string, value?: string | null) {
+  if (!value) return null
+
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto", padding: 40 }}>
-      {/* Executive Summary */}
-      <section className="mb-16">
-        <span
-          className="font-mono"
-          style={{ fontSize: 10, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}
-        >
-          OVERVIEW
-        </span>
-        <h2
-          className="font-sans"
-          style={{ fontSize: 18, fontWeight: 600, color: "var(--text-1)", marginTop: 4, marginBottom: 16 }}
-        >
-          Executive Summary
-        </h2>
-        <div style={{ marginTop: 16 }}>
-          <p
-            className="font-serif"
-            style={{ fontSize: 17, fontWeight: 500, fontStyle: "italic", color: "var(--text-1)", lineHeight: 1.65 }}
-          >
-            Nikola Tesla was a Serbian-American inventor, electrical engineer, and futurist
-            whose contributions to the design of the modern alternating current electricity
-            supply system have earned him a place among history&apos;s most consequential
-            scientists.
-          </p>
-          <p
-            className="font-sans mt-4"
-            style={{ fontSize: 15, color: "var(--text-2)", lineHeight: 1.75 }}
-          >
-            Working at the intersection of electrical engineering and theoretical physics,
-            Tesla held over 300 patents and is credited with the invention of the induction motor,
-            the Tesla coil, and foundational work in wireless communication. His rivalry with
-            Thomas Edison, known as the &quot;War of Currents,&quot; defined an era of
-            technological innovation and corporate competition.
-          </p>
-          <p
-            className="font-sans mt-4"
-            style={{ fontSize: 15, color: "var(--text-2)", lineHeight: 1.75 }}
-          >
-            Despite his extraordinary contributions, Tesla spent his final years in poverty,
-            living alone in a New York hotel room. His legacy has experienced a dramatic
-            posthumous revival, making him one of the most recognized figures in the
-            history of science and technology.
-          </p>
-        </div>
-      </section>
+    <div
+      className="grid gap-4"
+      style={{
+        padding: "16px 0",
+        borderBottom: "1px solid var(--border-soft)",
+        gridTemplateColumns: "minmax(120px, 160px) 1fr",
+      }}
+    >
+      <p
+        className="font-mono"
+        style={{ fontSize: 11, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.08em" }}
+      >
+        {label}
+      </p>
+      <p className="font-sans" style={{ fontSize: 14, color: "var(--text-1)", lineHeight: 1.7 }}>
+        {value}
+      </p>
+    </div>
+  )
+}
 
-      {/* Timeline */}
+export function OverviewTab({ researchData }: Readonly<OverviewTabProps>) {
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
+
+  const basic = researchData?.basic_info
+  const wiki = researchData?.acquisition?.wiki
+  const sections = wiki?.sections || []
+  const socials = researchData?.acquisition?.socials
+  const introParagraphs = useMemo(() => normalizeParagraphs(wiki?.intro_summary), [wiki?.intro_summary])
+  const sectionItems = useMemo(
+    () =>
+      sections.slice(0, 8).map((section, index) => {
+        const title = section.section || "Section"
+        const id = toSectionId(title, index)
+        const paragraphs = normalizeParagraphs(section.text)
+
+        return {
+          id,
+          title,
+          paragraphs,
+        }
+      }),
+    [sections]
+  )
+
+  const socialIcons = useMemo(() => {
+    const source: Array<{
+      label: string
+      icon: typeof Global
+      links: string[]
+    }> = [
+      {
+        label: "Website",
+        icon: Global,
+        links: (socials?.website || []).map((value) => ensureUrl(value)).filter(Boolean),
+      },
+      {
+        label: "Twitter",
+        icon: Letter,
+        links: (socials?.twitter || [])
+          .map((value) => value.url || (value.handle ? `https://twitter.com/${value.handle.replace(/^@/, "")}` : ""))
+          .filter(Boolean),
+      },
+      {
+        label: "Instagram",
+        icon: Camera,
+        links: (socials?.instagram || [])
+          .map((value) => value.url || (value.handle ? `https://instagram.com/${value.handle.replace(/^@/, "")}` : ""))
+          .filter(Boolean),
+      },
+      {
+        label: "Facebook",
+        icon: UsersGroupTwoRounded,
+        links: (socials?.facebook || [])
+          .map((value) => value.url || (value.handle ? `https://facebook.com/${value.handle.replace(/^@/, "")}` : ""))
+          .filter(Boolean),
+      },
+      {
+        label: "LinkedIn",
+        icon: Suitcase,
+        links: (socials?.linkedin || [])
+          .map((value) => value.url || (value.handle ? `https://linkedin.com/in/${value.handle.replace(/^@/, "")}` : ""))
+          .filter(Boolean),
+      },
+      {
+        label: "YouTube",
+        icon: PlayCircle,
+        links: (socials?.youtube || [])
+          .map((value) => value.url || (value.handle ? `https://youtube.com/@${value.handle.replace(/^@/, "")}` : ""))
+          .filter(Boolean),
+      },
+    ]
+
+    return source.flatMap((group) => group.links.slice(0, 1).map((url) => ({
+      id: `${group.label}-${url}`,
+      label: group.label,
+      url,
+      icon: group.icon,
+    })))
+  }, [socials])
+
+  return (
+    <div style={{ maxWidth: 820, margin: "0 auto", padding: "48px 40px 96px" }}>
       <section className="mb-16">
-        <span
-          className="font-mono"
-          style={{ fontSize: 10, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}
-        >
-          CHRONOLOGY
-        </span>
-        <h2
-          className="font-sans"
-          style={{ fontSize: 18, fontWeight: 600, color: "var(--text-1)", marginTop: 4, marginBottom: 16 }}
-        >
-          Key Timeline
-        </h2>
-        <div style={{ marginTop: 16 }}>
-          {timeline.map((item, i) => (
-            <div
-              key={item.year}
-              className="flex"
-              style={{
-                padding: "16px 0",
-                borderBottom: i < timeline.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
-              }}
-            >
-              {/* Year */}
+        <div className="flex items-center gap-2 mb-4">
+          <span
+            className="font-mono text-[var(--gold)]"
+            style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.18em", fontWeight: 600 }}
+          >
+            Overview
+          </span>
+          <div style={{ height: 1, flex: 1, background: "linear-gradient(to right, var(--gold-soft), transparent)", opacity: 0.3 }}></div>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-[220px_minmax(0,1fr)]" style={{ alignItems: "start" }}>
+          <div>
+            {basic?.image_url ? (
+              <img
+                src={basic.image_url}
+                alt={basic.name || "Entity"}
+                style={{
+                  width: "100%",
+                  aspectRatio: "4 / 5",
+                  objectFit: "cover",
+                  borderRadius: 18,
+                  border: "1px solid var(--border-soft)",
+                }}
+              />
+            ) : (
               <div
-                className="font-mono shrink-0"
-                style={{ width: 80, fontSize: 13, color: "var(--text-3)" }}
-              >
-                {item.year}
-              </div>
-              {/* Connector */}
-              <div className="flex flex-col items-center shrink-0" style={{ width: 24, position: "relative" }}>
-                <div
-                  style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    background: item.featured ? "var(--gold)" : "rgba(255,255,255,0.15)",
-                    marginTop: 6,
-                    zIndex: 1,
-                  }}
-                />
-                {i < timeline.length - 1 && (
-                  <div
-                    style={{
-                      width: 1,
-                      flex: 1,
-                      background: "var(--border-soft)",
-                      position: "absolute",
-                      top: 16,
-                      bottom: -20,
-                    }}
-                  />
-                )}
-              </div>
-              {/* Content */}
-              <div className="flex-1 ml-3">
-                <div
-                  className="font-sans"
-                  style={{ fontSize: 15, fontWeight: 500, color: "var(--text-1)" }}
-                >
-                  {item.title}
-                </div>
-                <div
-                  className="font-sans"
-                  style={{ fontSize: 14, color: "var(--text-2)", marginTop: 2, lineHeight: 1.6 }}
-                >
-                  {item.desc}
-                </div>
-              </div>
+                style={{
+                  width: "100%",
+                  aspectRatio: "4 / 5",
+                  borderRadius: 18,
+                  background: "var(--surface-2)",
+                  border: "1px solid var(--border-soft)",
+                }}
+              />
+            )}
+
+            <div style={{ marginTop: 18, borderTop: "1px solid var(--border-soft)" }}>
+              {formatLabelValue("Wikidata", basic?.wikidata_id || "N/A")}
+              {formatLabelValue("Source", wiki?.wikipedia_title || basic?.name || null)}
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
 
-      {/* Achievements */}
-      <section className="mb-16">
-        <span
-          className="font-mono"
-          style={{ fontSize: 10, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}
-        >
-          CONTRIBUTIONS
-        </span>
-        <h2
-          className="font-sans"
-          style={{ fontSize: 18, fontWeight: 600, color: "var(--text-1)", marginTop: 4, marginBottom: 16 }}
-        >
-          Key Achievements
-        </h2>
-        <div
-          className="grid gap-8"
-          style={{ gridTemplateColumns: "repeat(3, 1fr)", marginTop: 16 }}
-        >
-          {achievements.map((a) => {
-            const Icon = a.icon
-            return (
-              <div key={a.title}>
-                <Icon size={20} style={{ color: "var(--gold)" }} />
-                <div
-                  className="font-sans"
-                  style={{ fontSize: 14, fontWeight: 500, color: "var(--text-1)", marginTop: 10 }}
-                >
-                  {a.title}
-                </div>
-                <div
-                  className="font-sans"
-                  style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.6, marginTop: 4 }}
-                >
-                  {a.desc}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
+          <div>
+            <h1 className="font-sans" style={{ fontSize: 32, fontWeight: 650, color: "var(--text-1)", lineHeight: 1.1, letterSpacing: "-0.03em" }}>
+              {basic?.name || "Unknown Entity"}
+            </h1>
 
-      {/* Areas of Impact */}
-      <section className="mb-16">
-        <span
-          className="font-mono"
-          style={{ fontSize: 10, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}
-        >
-          ANALYSIS
-        </span>
-        <h2
-          className="font-sans"
-          style={{ fontSize: 18, fontWeight: 600, color: "var(--text-1)", marginTop: 4, marginBottom: 16 }}
-        >
-          Areas of Impact
-        </h2>
-        <div style={{ marginTop: 16 }} className="flex flex-col gap-5">
-          {impacts.map((item) => (
-            <div key={item.label}>
-              <div className="flex justify-between items-center mb-2">
-                <span
-                  className="font-sans"
-                  style={{ fontSize: 13, color: "var(--text-2)" }}
-                >
-                  {item.label}
-                </span>
-                <span
+            <p className="font-sans" style={{ marginTop: 10, fontSize: 16, color: "var(--text-2)", lineHeight: 1.75, maxWidth: 620 }}>
+              {basic?.description || "No description available."}
+            </p>
+
+            {introParagraphs.length ? (
+              <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--border-soft)" }}>
+                <p
                   className="font-mono"
-                  style={{ fontSize: 12, color: "var(--text-3)" }}
+                  style={{ fontSize: 10, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}
                 >
-                  {item.pct}%
-                </span>
+                  Briefing
+                </p>
+                <div className="flex flex-col gap-4">
+                  {introParagraphs.slice(0, PREVIEW_PARAGRAPH_COUNT).map((paragraph) => (
+                    <p
+                      key={`intro-${paragraph.slice(0, 24)}-${paragraph.length}`}
+                      className="font-sans"
+                      style={{ fontSize: 15, color: "var(--text-1)", lineHeight: 1.82 }}
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </div>
-              <div style={{ height: 2, background: "var(--border)", width: "100%" }}>
-                <div
-                  style={{
-                    height: 2,
-                    background: "var(--teal)",
-                    width: `${item.pct}%`,
-                    transition: "width 600ms ease",
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ) : null}
 
-      {/* Legacy Quote */}
-      <section className="mb-16">
-        <span
-          className="font-mono"
-          style={{ fontSize: 10, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}
-        >
-          LEGACY
-        </span>
-        <h2
-          className="font-sans"
-          style={{ fontSize: 18, fontWeight: 600, color: "var(--text-1)", marginTop: 4, marginBottom: 16 }}
-        >
-          Enduring Impact
-        </h2>
-        <div
-          style={{
-            marginTop: 16,
-            borderLeft: "3px solid var(--gold)",
-            paddingLeft: 24,
-          }}
-        >
-          <blockquote
-            className="font-serif"
-            style={{
-              fontSize: 20,
-              fontWeight: 400,
-              fontStyle: "italic",
-              color: "var(--text-1)",
-              lineHeight: 1.65,
-            }}
-          >
-            &ldquo;The present is theirs; the future, for which I really worked, is mine.&rdquo;
-          </blockquote>
-          <div
-            className="font-sans"
-            style={{ fontSize: 12, color: "var(--text-3)", marginTop: 12 }}
-          >
-            Nikola Tesla, c. 1930s
+            {socialIcons.length ? (
+              <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--border-soft)" }}>
+                <p
+                  className="font-mono"
+                  style={{ fontSize: 10, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}
+                >
+                  Links
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {socialIcons.map((item) => {
+                    const Icon = item.icon
+                    return (
+                      <a
+                        key={item.id}
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={item.label}
+                        title={item.label}
+                        className="font-mono"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "8px 12px",
+                          borderRadius: 999,
+                          border: "1px solid var(--border-soft)",
+                          color: "var(--text-2)",
+                          background: "transparent",
+                          textDecoration: "none",
+                          fontSize: 11,
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        <Icon size={14} color="var(--gold)" />
+                        {item.label}
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
+      </section>
+
+      <section className="mb-16">
+        <span
+          className="font-mono"
+          style={{ fontSize: 10, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.1em" }}
+        >
+          Knowledge Base
+        </span>
+        <h2
+          className="font-sans"
+          style={{ fontSize: 18, fontWeight: 600, color: "var(--text-1)", marginTop: 4, marginBottom: 10 }}
+        >
+          Wikipedia sections
+        </h2>
+        <p className="font-sans" style={{ fontSize: 14, color: "var(--text-3)", lineHeight: 1.7, marginBottom: 20 }}>
+          A structured reading of the core background material for this person.
+        </p>
+
+        {sectionItems.length ? (
+          <Accordion
+            type="multiple"
+            className="w-full"
+            defaultValue={sectionItems.slice(0, 1).map((section) => section.id)}
+          >
+            {sectionItems.map((section) => {
+              const isExpanded = expandedSections[section.id] || false
+              const visibleParagraphs = isExpanded
+                ? section.paragraphs
+                : section.paragraphs.slice(0, PREVIEW_PARAGRAPH_COUNT)
+              const hasMore = section.paragraphs.length > PREVIEW_PARAGRAPH_COUNT
+
+              return (
+                <AccordionItem key={section.id} value={section.id} className="border-[var(--border-soft)]">
+                  <AccordionTrigger className="font-sans text-[15px] text-[var(--gold)] hover:no-underline">
+                    {section.title}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex flex-col gap-3" style={{ paddingRight: 12 }}>
+                      {visibleParagraphs.length ? (
+                        visibleParagraphs.map((paragraph) => (
+                          <p
+                            key={`${section.id}-p-${paragraph.slice(0, 24)}-${paragraph.length}`}
+                            className="font-sans"
+                            style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.78 }}
+                          >
+                            {paragraph}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="font-sans" style={{ fontSize: 14, color: "var(--text-3)", lineHeight: 1.7 }}>
+                          No content available.
+                        </p>
+                      )}
+
+                      {hasMore ? (
+                        <button
+                          type="button"
+                          className="font-mono"
+                          onClick={() =>
+                            setExpandedSections((prev) => ({
+                              ...prev,
+                              [section.id]: !isExpanded,
+                            }))
+                          }
+                          style={{
+                            marginTop: 2,
+                            width: "fit-content",
+                            fontSize: 11,
+                            letterSpacing: "0.06em",
+                            textTransform: "uppercase",
+                            color: "var(--teal)",
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: 0,
+                          }}
+                        >
+                          {isExpanded ? "Show less" : `Read more (${section.paragraphs.length - PREVIEW_PARAGRAPH_COUNT} more)`}
+                        </button>
+                      ) : null}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )
+            })}
+          </Accordion>
+        ) : (
+          <div style={{ borderTop: "1px solid var(--border-soft)", paddingTop: 18 }}>
+            <p className="font-sans" style={{ fontSize: 15, color: "var(--text-1)", lineHeight: 1.75 }}>
+              No wiki sections available yet.
+            </p>
+          </div>
+        )}
       </section>
     </div>
   )

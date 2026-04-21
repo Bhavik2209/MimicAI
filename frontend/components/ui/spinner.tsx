@@ -1,10 +1,10 @@
-import { Loader2Icon } from 'lucide-react'
+import { Restart } from '@/components/ui/solar-icons'
 
 import { cn } from '@/lib/utils'
 
 function Spinner({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
-    <Loader2Icon
+    <Restart
       role="status"
       aria-label="Loading"
       className={cn('size-4 animate-spin', className)}

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display, DM_Mono, Space_Mono, Spectral, Space_Grotesk } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ThemeInitializer } from '@/components/theme/theme-initializer'
 import './globals.css'
 
 const inter = Inter({
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#EEECEA',
+  themeColor: '#f8f7f4',
 }
 
 export default function RootLayout({
@@ -61,12 +62,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} ${spaceMono.variable} ${spectral.variable} ${dmMono.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
-      <body className="antialiased">
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem("mimic.theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");})();`,
-          }}
-        />
+      <head />
+      <body className="antialiased" suppressHydrationWarning>
+        <ThemeInitializer />
 
         {/* Dot-grid texture layer (light theme) */}
         <div className="page-dot-grid" aria-hidden="true" />

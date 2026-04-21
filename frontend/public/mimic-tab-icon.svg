@@ -1,0 +1,19 @@
+<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg" fill="none" aria-label="Mimic AI tab icon">
+  <style>
+    .logo {
+      stroke: #43384A;
+    }
+    @media (prefers-color-scheme: dark) {
+      .logo {
+        stroke: #b3a4bc;
+      }
+    }
+  </style>
+  <path
+    class="logo"
+    d="M 20 180 L 20 60 A 40 40 0 0 1 100 60 L 100 120 A 40 40 0 0 0 180 120 L 180 60 A 40 40 0 0 1 260 60 L 260 180"
+    stroke-width="40"
+    stroke-linecap="butt"
+    stroke-linejoin="round"
+  />
+</svg>

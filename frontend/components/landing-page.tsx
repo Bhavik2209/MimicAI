@@ -3,36 +3,45 @@
 import { useState, useEffect, useRef, Fragment } from "react"
 import {
   ArrowRight,
-  Search,
-  BookOpen,
-  Zap,
-  Check,
-  Clock3,
-  AlertTriangle,
-  Newspaper,
-  MessagesSquare,
+  ArrowRightUp,
+  Magnifier,
+  BookBookmark,
+  CheckCircle,
+  ClockCircle,
+  DangerTriangle,
+  Siren,
+  ChatRoundDots,
+  ChatLine,
   FolderOpen,
-  Circle,
-  LoaderCircle,
+  Record,
+  RecordCircle,
   ArrowUp,
-  History,
-  SquarePen,
-  Brain,
-  GitBranch,
-  BarChart2,
+  Restart,
+  PenNewSquare,
+  Export,
+  ShareCircle,
+  SortByTime,
+  SquareAltArrowLeft,
   Settings,
-  User,
-  Play,
+  Widget,
+  UserRounded,
+  Suitcase,
+  Documents,
+  Database,
   FileText,
-  ExternalLink,
-} from "lucide-react"
+  DocumentText,
+  UserId,
+  Link,
+} from "@/components/ui/solar-icons"
 
 /* ─── Data ─── */
 
-const TYPEWRITER_NAMES = ["Nikola Tesla", "Marie Curie", "Alan Turing"]
+const TYPEWRITER_NAMES = ["Ada Lovelace", "Marie Curie", "Alan Turing"]
 
 interface LandingPageProps {
   onGetStarted: () => void
+  isSignedIn?: boolean
+  isAuthPending?: boolean
 }
 
 type PipelineStatus = "done" | "active" | "pending"
@@ -52,7 +61,7 @@ const PIPELINE_ROWS: PipelineAgent[][] = [
     {
       step: 1,
       name: "Biography Agent",
-      icon: BookOpen,
+      icon: BookBookmark,
       status: "done",
       description: "Extracting core biography and factual records",
       duration: "3.2s",
@@ -60,7 +69,7 @@ const PIPELINE_ROWS: PipelineAgent[][] = [
     {
       step: 2,
       name: "Timeline Agent",
-      icon: Clock3,
+      icon: ClockCircle,
       status: "done",
       description: "Sequencing milestones into a verified chronology",
       duration: "2.7s",
@@ -70,7 +79,7 @@ const PIPELINE_ROWS: PipelineAgent[][] = [
     {
       step: 3,
       name: "Controversies Finder",
-      icon: AlertTriangle,
+      icon: DangerTriangle,
       status: "active",
       description: "Cross-checking contested claims across sources",
       activeText: "Analyzing 23 sources...",
@@ -78,7 +87,7 @@ const PIPELINE_ROWS: PipelineAgent[][] = [
     {
       step: 4,
       name: "News Agent",
-      icon: Newspaper,
+      icon: Siren,
       status: "pending",
       description: "Scanning recent publications and headlines",
     },
@@ -87,7 +96,7 @@ const PIPELINE_ROWS: PipelineAgent[][] = [
     {
       step: 5,
       name: "Social Media Agent",
-      icon: MessagesSquare,
+      icon: ChatRoundDots,
       status: "pending",
       description: "Mapping public discourse and sentiment signals",
     },
@@ -110,6 +119,12 @@ const TRUST_PILLS = [
   "Myth Busting",
   "Timeline Engine",
   "Influence Mapping",
+]
+
+const HERO_METRICS = [
+  { label: "Avg profile time", value: "< 60s" },
+  { label: "Parallel agents", value: "6" },
+  { label: "Citation mode", value: "Always on" },
 ]
 
 const TESTIMONIALS = [
@@ -162,11 +177,36 @@ const PRICING_PLANS = [
   },
 ]
 
+const USE_CASES = [
+  {
+    title: "Researchers",
+    icon: BookBookmark,
+    summary: "Build a source-backed profile in minutes, then drill into citations and timelines.",
+    points: ["Structured evidence graph", "Controversy and confidence labeling"],
+  },
+  {
+    title: "Students",
+    icon: UserId,
+    summary: "Understand historical figures quickly, then ask grounded follow-up questions in chat.",
+    points: ["Digestible profile tabs", "Persona Q&A with retrieval grounding"],
+  },
+  {
+    title: "Journalists",
+    icon: FileText,
+    summary: "Cross-check claims, review source provenance, and export summaries for editorial workflows.",
+    points: ["Rapid source triangulation", "Export-ready intelligence snapshots"],
+  },
+]
+
 
 
 /* ─── Main Component ─── */
 
-export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
+export function LandingPage({
+  onGetStarted,
+  isSignedIn = false,
+  isAuthPending = false,
+}: Readonly<LandingPageProps>) {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [typewriterName, setTypewriterName] = useState(TYPEWRITER_NAMES[0])
   const revealRefs = useRef<HTMLElement[]>([])
@@ -199,6 +239,13 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
     if (el && !revealRefs.current.includes(el)) revealRefs.current.push(el)
   }
 
+  let authCtaLabel = "Login with Google"
+  if (isSignedIn) {
+    authCtaLabel = "Go to dashboard"
+  } else if (isAuthPending) {
+    authCtaLabel = "Redirecting..."
+  }
+
   return (
     <div className="overflow-x-hidden" style={{ background: "transparent" }}>
 
@@ -209,6 +256,13 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
         style={{ minHeight: "100vh", paddingTop: 120, paddingBottom: 0, overflow: "hidden" }}
       >
         <div className="relative z-10 max-w-3xl">
+          <div className="hero-enter hero-enter-d1">
+            <span className="hero-badge">
+              <span className="hero-badge-new">New</span>
+              Public docs + private project workspaces
+            </span>
+          </div>
+
           {/* Main heading — large editorial mixed-type */}
           <h1
             className="hero-enter hero-enter-d1 mb-6"
@@ -221,13 +275,30 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
             }}
           >
             <span
-              className="display-serif"
-              style={{ display: "block", fontWeight: 500, fontSize: "0.9em", letterSpacing: "-0.015em", marginBottom: "0.08em" }}
+              style={{
+                display: "block",
+                fontFamily: "var(--font-sans)",
+                fontWeight: 800,
+                fontSize: "0.9em",
+                letterSpacing: "-0.02em",
+                marginBottom: "0.08em",
+              }}
             >
-              Every mind,
+              <span style={{ WebkitTextFillColor: "var(--text-1)" }}>Every mind </span>
+              <span className="gradient-text">mapped</span>
             </span>
-            <span className="gradient-text">mapped</span>
-            <span style={{ WebkitTextFillColor: "var(--text-1)" }}> and accessible.</span>
+            <span
+              style={{
+                display: "block",
+                fontFamily: "var(--font-sans)",
+                fontWeight: 800,
+                fontSize: "0.9em",
+                letterSpacing: "-0.02em",
+                WebkitTextFillColor: "var(--text-1)",
+              }}
+            >
+              and accessible
+            </span>
           </h1>
 
           {/* Subtitle */}
@@ -245,17 +316,55 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
               onClick={onGetStarted}
               className="btn btn-primary flex items-center gap-2 px-8 py-3.5 text-base"
               style={{ fontSize: 15, borderRadius: 8 }}
+              disabled={isAuthPending}
             >
-              Get started for free
-              <ArrowRight size={16} />
+              {authCtaLabel}
+              <ArrowRight size={16} weight="Bold" />
             </button>
             <a
-              href="#how-it-works"
+              href="/how-it-works"
               className="btn btn-secondary px-7 py-3.5"
               style={{ fontSize: 15, borderRadius: 8 }}
             >
-              See how it works
+              Read docs
             </a>
+          </div>
+
+          <div
+            className="hero-enter hero-enter-d3"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+              gap: 10,
+              maxWidth: 560,
+              margin: "0 auto 8px",
+            }}
+          >
+            {HERO_METRICS.map((metric) => (
+              <div
+                key={metric.label}
+                style={{
+                  border: "1px solid var(--border-soft)",
+                  borderRadius: 10,
+                  background: "var(--control-bg)",
+                  padding: "10px 12px",
+                }}
+              >
+                <p
+                  className="font-mono"
+                  style={{
+                    fontSize: 10,
+                    color: "var(--text-3)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    marginBottom: 4,
+                  }}
+                >
+                  {metric.label}
+                </p>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", lineHeight: 1.2 }}>{metric.value}</p>
+              </div>
+            ))}
           </div>
 
           {/* Agent Pipeline Visualization — peeks below the fold */}
@@ -264,7 +373,6 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           className="hero-enter hero-enter-d4 agent-pipeline-card mx-auto w-full hero-pipeline-peek"
           style={{
             maxWidth: 860,
-            background: "#ffffff",
             borderRadius: 8,
             marginTop: 48,
           }}
@@ -285,9 +393,9 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                     <div className="snake-row">
                       {displayRow.map((agent, colIndex) => {
                         const Icon = agent.icon
-                        let StatusIcon = Circle
-                        if (agent.status === "done") StatusIcon = Check
-                        if (agent.status === "active") StatusIcon = LoaderCircle
+                        let StatusIcon = Record
+                        if (agent.status === "done") StatusIcon = CheckCircle
+                        if (agent.status === "active") StatusIcon = RecordCircle
                         return (
                           <Fragment key={agent.name}>
                             <article className="snake-card" aria-label={`${agent.name} ${agent.status}`}>
@@ -295,13 +403,13 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                                 <div className="snake-card-left">
                                   <span className="snake-step">{String(agent.step).padStart(2, "0")}</span>
                                   <span className="snake-icon" aria-hidden="true">
-                                    <Icon size={14} />
+                                    <Icon size={14} weight="Broken" />
                                   </span>
                                   <span className="snake-name">{agent.name}</span>
                                 </div>
                                 <div className="snake-card-status-wrap">
                                   <span className={`snake-status snake-status-${agent.status}`} aria-hidden="true">
-                                    <StatusIcon size={9} />
+                                    <StatusIcon size={9} weight={agent.status === "active" ? "Linear" : "Bold"} />
                                   </span>
                                   {agent.status === "done" && agent.duration && (
                                     <span className="snake-duration">{agent.duration}</span>
@@ -430,8 +538,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           <p className="hex-eyebrow">How It Works</p>
           <h2 className="section-title mx-auto">
             <span
-              className="display-serif"
-              style={{ display: "block", fontWeight: 500, fontSize: "0.88em", letterSpacing: "-0.01em" }}
+              style={{ display: "block", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "0.88em", letterSpacing: "-0.01em" }}
             >
               Intelligence built in
             </span>
@@ -454,7 +561,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                   className="flex items-center gap-2.5 px-4 py-3 rounded-xl w-full"
                   style={{ background: "var(--control-bg)", border: "1px solid var(--border)" }}
                 >
-                  <Search size={15} style={{ color: "var(--text-3)", flexShrink: 0 }} />
+                  <Magnifier size={15} weight="Linear" style={{ color: "var(--text-3)", flexShrink: 0 }} />
                   <span className="font-mono text-sm" style={{ color: "var(--text-2)" }}>
                     <span key={typewriterName} className="name-fade" aria-live="polite">{typewriterName}</span>
                     <span className="inline-block ml-0.5 animate-pulse" style={{ color: "var(--teal)", animationDuration: "0.8s" }} aria-hidden>|</span>
@@ -464,7 +571,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
               {/* text */}
               <h3 className="hiw-title">Input a Name</h3>
               <p className="hiw-body">Type any historical or contemporary figure. The system spins up a multi-agent research pipeline.</p>
-              <button onClick={onGetStarted} className="card-learn-more hiw-cta">Explore →</button>
+              <a href="/how-it-works" className="card-learn-more hiw-cta">Read full breakdown →</a>
             </div>
           </div>
 
@@ -483,7 +590,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                         className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
                         style={{ background: "var(--control-bg)" }}
                       >
-                        <Icon size={12} style={{ color: "var(--gold)", flexShrink: 0 }} />
+                        <Icon size={12} weight="Bold" color="var(--gold)" style={{ flexShrink: 0 }} />
                         <span className="font-mono text-[10px] flex-1" style={{ color: "var(--text-2)" }}>{agent.name}</span>
                         <div className="w-10 h-1 rounded-full overflow-hidden" style={{ background: "var(--border-soft)", flexShrink: 0 }}>
                           <div
@@ -503,7 +610,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
               {/* text */}
               <h3 className="hiw-title">Agents Activate</h3>
               <p className="hiw-body">Six specialized agents work in parallel — researching, verifying, and synthesizing data.</p>
-              <button onClick={onGetStarted} className="card-learn-more hiw-cta">Explore →</button>
+              <a href="/how-it-works" className="card-learn-more hiw-cta">Read full breakdown →</a>
             </div>
           </div>
 
@@ -518,10 +625,10 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center font-sans text-xs font-semibold shrink-0"
                       style={{ background: "var(--text-1)", color: "#fff" }}
-                    >NT</div>
+                    >AL</div>
                     <div>
-                      <div className="font-sans text-sm font-semibold" style={{ color: "var(--text-1)" }}>Nikola Tesla</div>
-                      <div className="font-mono text-[10px]" style={{ color: "var(--text-3)" }}>1856–1943 · Score: 94</div>
+                      <div className="font-sans text-sm font-semibold" style={{ color: "var(--text-1)" }}>Ada Lovelace</div>
+                      <div className="font-mono text-[10px]" style={{ color: "var(--text-3)" }}>1815–1852 · Score: 94</div>
                     </div>
                   </div>
                   <div className="p-2.5 rounded-lg" style={{ background: "var(--gold-dim)", borderLeft: "3px solid var(--gold)" }}>
@@ -535,7 +642,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
               {/* text */}
               <h3 className="hiw-title">Profile + Chat</h3>
               <p className="hiw-body">Get a structured intelligence profile with tabs. Converse with the persona in real time.</p>
-              <button onClick={onGetStarted} className="card-learn-more hiw-cta">Explore →</button>
+              <a href="/how-it-works" className="card-learn-more hiw-cta">Read full breakdown →</a>
             </div>
           </div>
         </div>
@@ -554,8 +661,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
             <p className="hex-eyebrow">Preview</p>
             <h2 className="section-title">
               <span
-                className="display-serif"
-                style={{ display: "block", fontWeight: 500, fontSize: "0.88em", letterSpacing: "-0.01em" }}
+                style={{ display: "block", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "0.88em", letterSpacing: "-0.01em" }}
               >
                 A profile unlike
               </span>
@@ -565,30 +671,43 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           {/* ── Cards stage ── */}
           <div style={{ position: "relative", height: 480 }}>
 
-            {/* ── Timeline card — behind, left, rotated ── */}
-            <div className="preview-card-left" style={{
-              position: "absolute", left: -50, top: 0, width: 800, height: 460,
-              transform: "rotate(-7deg)", transformOrigin: "center bottom",
-              zIndex: 1, borderRadius: 12, border: "1px solid var(--border)",
-              boxShadow: "0 16px 48px rgba(25,23,46,0.35)",
+            {/* ── Overview card — center ── */}
+            <div className="preview-card-center" style={{
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)",
+              top: 20,
+              width: 800,
+              height: 460,
+              zIndex: 2,
+              borderRadius: 12,
+              border: "1px solid var(--border)",
+              boxShadow: "0 24px 64px rgba(25,23,46,0.13), 0 4px 16px rgba(25,23,46,0.07)",
               overflow: "hidden", pointerEvents: "auto", userSelect: "none",
               display: "flex", flexDirection: "column", background: "var(--bg)",
             }}>
-              {/* Header — entity name + tabs */}
-              <div style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "0 18px", height: 46, display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--gold-dim)", color: "var(--gold)", fontFamily: "var(--font-serif, serif)", fontStyle: "italic", fontWeight: 700, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>NT</div>
-                <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontWeight: 700, fontSize: 13, color: "var(--text-1)" }}>Nikola Tesla</span>
-                <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--text-3)", background: "rgba(255,255,255,0.06)", padding: "2px 7px", borderRadius: 20, letterSpacing: "0.04em" }}>Entity</span>
-                {/* Tab row */}
-                <div style={{ marginLeft: 12, display: "flex", gap: 2 }}>
-                  {["Overview", "Timeline", "Insights", "Persona"].map((tab) => (
-                    <div key={tab} style={{
-                      padding: "4px 10px", borderRadius: 6, fontSize: 10, fontFamily: "var(--font-sans, sans-serif)", fontWeight: 500,
-                      color: tab === "Timeline" ? "var(--gold)" : "var(--text-3)",
-                      background: tab === "Timeline" ? "var(--gold-dim)" : "transparent",
-                      border: "1px solid transparent",
-                    }}>{tab}</div>
-                  ))}
+              {/* Header — mirrors profile page header */}
+              <div style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "8px 14px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 7, border: "1px solid var(--border-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", background: "var(--bg)", flexShrink: 0 }}>
+                    <SquareAltArrowLeft size={12} weight="Linear" color="currentColor" />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 8.5, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 1 }}>Overview</span>
+                    <div style={{ fontFamily: "var(--font-sans, sans-serif)", fontWeight: 650, fontSize: 13, color: "var(--text-1)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.2 }}>Ada Lovelace</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 10, color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis" }}>AC Systems Research</span>
+                      <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--text-3)", flexShrink: 0 }}>· Jan 12, 2026</span>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 7px", borderRadius: 7, border: "1px solid var(--border-soft)", color: "var(--text-3)", fontFamily: "var(--font-sans, sans-serif)", fontSize: 9, fontWeight: 500 }}>
+                    <ShareCircle size={10} weight="Linear" color="currentColor" /> Share
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 7px", borderRadius: 7, border: "1px solid var(--border-soft)", color: "var(--text-3)", fontFamily: "var(--font-sans, sans-serif)", fontSize: 9, fontWeight: 500 }}>
+                    <Export size={10} weight="Linear" color="currentColor" /> Export
+                  </div>
                 </div>
               </div>
 
@@ -597,96 +716,90 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                 {/* Icon-only sidebar — identical to persona chat card */}
                 <div style={{ width: 52, background: "var(--bg)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", padding: "20px 0", flexShrink: 0 }}>
                   {[
-                    { Icon: BookOpen, key: "overview" },
-                    { Icon: Brain, key: "personality" },
-                    { Icon: GitBranch, key: "timeline" },
+                    { Icon: Widget, key: "overview" },
+                    { Icon: UserId, key: "personality" },
+                    { Icon: SortByTime, key: "timeline" },
                   ].map(({ Icon, key }) => (
                     <div key={key} style={{ width: "100%", display: "flex", justifyContent: "center", padding: "1px 9px" }}>
                       <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center",
-                        background: key === "timeline" ? "var(--gold-dim)" : "transparent" }}>
-                        <Icon size={16} style={{ color: key === "timeline" ? "var(--gold)" : "var(--text-3)" }} />
+                        background: key === "overview" ? "var(--gold-dim)" : "transparent" }}>
+                        <Icon size={16} weight="Linear" color={key === "overview" ? "var(--gold)" : "var(--text-3)"} />
                       </div>
-                      {key === "timeline" && <div style={{ position: "absolute", left: 0, width: 3, height: 34, background: "var(--gold)", borderRadius: "0 2px 2px 0" }} />}
+                      {key === "overview" && <div style={{ position: "absolute", left: 0, width: 3, height: 34, background: "var(--gold)", borderRadius: "0 2px 2px 0" }} />}
                     </div>
                   ))}
                   <div style={{ height: 1, background: "var(--border-soft)", margin: "8px 10px" }} />
                   {[
-                    { Icon: AlertTriangle, key: "controversies" },
-                    { Icon: Newspaper, key: "news" },
-                    { Icon: BarChart2, key: "resources" },
+                    { Icon: Siren, key: "news" },
+                    { Icon: Suitcase, key: "work" },
+                    { Icon: Documents, key: "resources" },
                   ].map(({ Icon, key }) => (
                     <div key={key} style={{ width: "100%", display: "flex", justifyContent: "center", padding: "1px 9px" }}>
                       <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Icon size={16} style={{ color: "var(--text-3)" }} />
+                        <Icon size={16} weight="Linear" color="var(--text-3)" />
                       </div>
                     </div>
                   ))}
                   <div style={{ height: 1, background: "var(--border-soft)", margin: "8px 10px" }} />
                   <div style={{ width: "100%", padding: "1px 9px" }}>
                     <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <MessagesSquare size={16} style={{ color: "var(--text-3)" }} />
+                      <ChatLine size={16} weight="Linear" color="var(--text-3)" />
                     </div>
                   </div>
                   <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "0 9px" }}>
                     <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Settings size={16} style={{ color: "var(--text-3)" }} />
+                      <Settings size={16} weight="Linear" color="var(--text-3)" />
                     </div>
                     <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--surface-3, #2a2838)", border: "1px solid var(--border-soft)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <User size={15} style={{ color: "var(--text-2)" }} />
+                      <UserRounded size={15} weight="Linear" color="var(--text-2)" />
                     </div>
                   </div>
                 </div>
 
-                {/* Timeline main content */}
+                {/* Overview main content */}
                 <div style={{ flex: 1, overflow: "hidden", padding: "18px 20px" }}>
-                  <h2 style={{ fontSize: 18, color: "var(--ivory, #f5f0e8)", fontWeight: 500, fontStyle: "italic", fontFamily: "var(--font-serif, serif)", lineHeight: 1.2, margin: "0 0 4px" }}>Chronology &amp; Milestones</h2>
-                  <p style={{ fontSize: 10.5, color: "var(--text-2)", fontFamily: "var(--font-sans, sans-serif)", margin: "0 0 16px", lineHeight: 1.5 }}>The defining moments spanning the lifetime of the entity.</p>
-                  <div style={{ position: "relative" }}>
-                    <div style={{ position: "absolute", left: 19, top: 0, bottom: 0, width: 1, background: "rgba(255,255,255,0.08)" }} />
-                    {[
-                      { year: "1856", title: "Birth in Smiljan", cat: "event" },
-                      { year: "1882", title: "Conception of AC Motor", cat: "invention" },
-                      { year: "1884", title: "Arrival in America", cat: "career" },
-                      { year: "1891", title: "The Tesla Coil", cat: "invention" },
-                    ].map((item) => (
-                      <div key={item.year} style={{ display: "flex", gap: 14, marginBottom: 14, alignItems: "flex-start" }}>
-                        <div style={{ width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <Zap size={14} style={{ color: item.cat === "invention" ? "var(--teal, #4ecdc4)" : "var(--gold)" }} />
-                        </div>
-                        <div>
-                          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 2 }}>
-                            <span style={{ fontSize: 15, fontWeight: 500, color: "var(--gold)", fontFamily: "var(--font-mono, monospace)" }}>{item.year}</span>
-                            <span style={{ fontSize: 8.5, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--text-3)", fontFamily: "var(--font-mono, monospace)" }}>{item.cat}</span>
-                          </div>
-                          <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--ivory, #f5f0e8)", fontFamily: "var(--font-sans, sans-serif)" }}>{item.title}</div>
-                        </div>
+                  <h2 style={{ fontSize: 18, color: "var(--text-1)", fontWeight: 600, fontFamily: "var(--font-sans, sans-serif)", lineHeight: 1.2, margin: "0 0 6px" }}>Profile summary</h2>
+                  <p style={{ fontSize: 11, color: "var(--text-2)", fontFamily: "var(--font-sans, sans-serif)", margin: "0 0 14px", lineHeight: 1.55 }}>A concise reading of background, identity, and contextual knowledge from core references.</p>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "170px 1fr", gap: 16, alignItems: "start" }}>
+                    <div>
+                      <div style={{ width: "100%", aspectRatio: "4 / 5", borderRadius: 12, border: "1px solid var(--border-soft)", background: "var(--surface-2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", fontFamily: "var(--font-mono, monospace)", fontSize: 20, fontWeight: 600 }}>
+                        AL
                       </div>
-                    ))}
+                      <div style={{ marginTop: 10, borderTop: "1px solid var(--border-soft)", paddingTop: 8 }}>
+                        <div style={{ fontSize: 9, fontFamily: "var(--font-mono, monospace)", color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Wikidata</div>
+                        <div style={{ fontSize: 11, fontFamily: "var(--font-sans, sans-serif)", color: "var(--text-1)" }}>Q7259</div>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: 20, lineHeight: 1.1, letterSpacing: "-0.02em", color: "var(--text-1)", fontFamily: "var(--font-sans, sans-serif)", fontWeight: 700, margin: "0 0 8px" }}>Ada Lovelace</h3>
+                      <p style={{ fontSize: 12, color: "var(--text-2)", fontFamily: "var(--font-sans, sans-serif)", lineHeight: 1.65, margin: "0 0 12px" }}>Mathematician and writer known for her notes on Charles Babbage&apos;s Analytical Engine and early vision of general-purpose computing.</p>
+                      <div style={{ borderTop: "1px solid var(--border-soft)", paddingTop: 10 }}>
+                        <div style={{ fontSize: 9, fontFamily: "var(--font-mono, monospace)", color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Briefing</div>
+                        <p style={{ fontSize: 11, color: "var(--text-2)", fontFamily: "var(--font-sans, sans-serif)", lineHeight: 1.6, margin: 0 }}>Core profile context includes verified biographical facts, foundational timeline events, and source-linked references for deeper analysis.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* ── Persona Chat page mockup ── */}
+            {/* ── Persona Chat page mockup — behind, left, rotated ── */}
             <div
-              className="preview-card-center"
+              className="preview-card-left"
               style={{
-                position: "absolute",
-                left: "50%",
-                transform: "translateX(-50%)",
-                top: 20,
-                width: 800,
-                height: 460,
-                background: "#ffffff",
+                position: "absolute", left: -50, top: 0, width: 800, height: 460,
+                transform: "rotate(-7deg)", transformOrigin: "center bottom",
+                background: "var(--bg)",
                 borderRadius: 12,
                 border: "1px solid var(--border)",
-                boxShadow: "0 24px 64px rgba(25,23,46,0.13), 0 4px 16px rgba(25,23,46,0.07)",
+                boxShadow: "0 16px 48px rgba(25,23,46,0.35)",
                 overflow: "hidden",
                 pointerEvents: "auto",
                 userSelect: "none",
                 display: "flex",
                 flexDirection: "column",
-                zIndex: 2,
+                zIndex: 1,
               }}
             >
             {/* ── Body: icon sidebar + chat ── */}
@@ -697,13 +810,13 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
 
                 {/* Group 1 — Profile */}
                 {[
-                  { Icon: BookOpen,      key: "overview" },
-                  { Icon: Brain,         key: "personality" },
-                  { Icon: GitBranch,     key: "timeline" },
+                  { Icon: Widget,        key: "overview" },
+                  { Icon: UserId,        key: "personality" },
+                  { Icon: SortByTime,    key: "timeline" },
                 ].map(({ Icon, key }) => (
                   <div key={key} style={{ width: "100%", display: "flex", justifyContent: "center", padding: "1px 9px" }}>
                     <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Icon size={16} style={{ color: "var(--text-3)" }} />
+                      <Icon size={16} weight="Linear" color="var(--text-3)" />
                     </div>
                   </div>
                 ))}
@@ -713,13 +826,13 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
 
                 {/* Group 2 — Insights */}
                 {[
-                  { Icon: AlertTriangle, key: "controversies" },
-                  { Icon: Newspaper,    key: "news" },
-                  { Icon: BarChart2,    key: "resources" },
+                  { Icon: Siren,          key: "news" },
+                  { Icon: Suitcase,       key: "work" },
+                  { Icon: Documents,      key: "resources" },
                 ].map(({ Icon, key }) => (
                   <div key={key} style={{ width: "100%", display: "flex", justifyContent: "center", padding: "1px 9px" }}>
                     <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Icon size={16} style={{ color: "var(--text-3)" }} />
+                      <Icon size={16} weight="Linear" color="var(--text-3)" />
                     </div>
                   </div>
                 ))}
@@ -731,37 +844,40 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                 <div style={{ position: "relative", width: "100%", padding: "1px 9px" }}>
                   <div style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: 3, height: 22, background: "var(--gold)", borderRadius: "0 2px 2px 0" }} />
                   <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gold-dim)" }}>
-                    <MessagesSquare size={16} style={{ color: "var(--gold)" }} />
+                    <ChatLine size={16} weight="Bold" color="var(--gold)" />
                   </div>
                 </div>
 
                 {/* Settings + user avatar pinned to bottom */}
                 <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "0 9px" }}>
                   <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Settings size={16} style={{ color: "var(--text-3)" }} />
+                    <Settings size={16} weight="Linear" color="var(--text-3)" />
                   </div>
                   <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--surface-3, #e8e6e0)", border: "1px solid var(--border-soft)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <User size={15} style={{ color: "var(--text-2)" }} />
+                    <UserRounded size={15} weight="Linear" color="var(--text-2)" />
                   </div>
                 </div>
               </div>
 
               {/* ── Main persona chat area ── */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#ffffff", minWidth: 0 }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg)", minWidth: 0 }}>
 
-                {/* Chat header */}
-                <div style={{ background: "#ffffff", borderBottom: "1px solid var(--border)", padding: "10px 18px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--gold-dim)", color: "var(--gold)", fontFamily: "var(--font-serif, serif)", fontStyle: "italic", fontWeight: 700, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>NT</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontWeight: 700, fontSize: 13, color: "var(--text-1)" }}>Nikola Tesla</span>
-                    <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--gold)", background: "var(--gold-dim)", padding: "2px 7px", borderRadius: 20, letterSpacing: "0.04em" }}>Persona</span>
+                {/* Chat header — mirrors persona chat page header */}
+                <div style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 7, border: "1px solid var(--border-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", background: "var(--bg)", flexShrink: 0 }}>
+                    <SquareAltArrowLeft size={12} weight="Linear" color="currentColor" />
+                  </div>
+                  <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--gold-dim)", color: "var(--gold)", fontFamily: "var(--font-serif, serif)", fontStyle: "italic", fontWeight: 700, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>AL</div>
+                  <div style={{ minWidth: 0 }}>
+                    <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontWeight: 700, fontSize: 12, color: "var(--text-1)", display: "block", lineHeight: 1.2 }}>Ada Lovelace</span>
+                    <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--text-3)", display: "block", letterSpacing: "0.04em" }}>Persona</span>
                   </div>
                   <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 6, border: "1px solid var(--border)", background: "#ffffff", fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 500, color: "var(--text-2)" }}>
-                      <SquarePen size={10} style={{ color: "var(--text-3)" }} /> New Session
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 6, border: "1px solid var(--border)", background: "var(--bg)", fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 500, color: "var(--text-2)" }}>
+                      <PenNewSquare size={10} weight="Linear" color="var(--text-3)" /> New Session
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 6, border: "1px solid var(--border)", background: "#ffffff", fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 500, color: "var(--text-2)" }}>
-                      <History size={10} style={{ color: "var(--text-3)" }} /> History
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 6, border: "1px solid var(--border)", background: "var(--bg)", fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 500, color: "var(--text-2)" }}>
+                      <Restart size={10} weight="Linear" color="var(--text-3)" /> History
                     </div>
                   </div>
                 </div>
@@ -771,30 +887,30 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
 
                   {/* User message — right-aligned light bubble */}
                   <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <div style={{ background: "#f0efed", border: "1px solid var(--border-soft)", padding: "10px 14px", borderRadius: "10px 10px 2px 10px", maxWidth: "75%" }}>
+                    <div style={{ background: "var(--control-bg)", border: "1px solid var(--border-soft)", padding: "10px 14px", borderRadius: "10px 10px 2px 10px", maxWidth: "75%" }}>
                       <p style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 12, color: "var(--text-1)", lineHeight: 1.6, margin: "0 0 4px" }}>
-                        Mr. Tesla, how did you first conceive the rotating magnetic field and the polyphase alternating current system, and why did you believe it was superior to Edison&apos;s direct current?
+                        Ada, in your own words, how did your work on the Analytical Engine shape your view of what machines could do beyond arithmetic?
                       </p>
                       <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--text-3)", display: "block", textAlign: "right" }}>23:00</span>
                     </div>
                   </div>
 
-                  {/* Tesla response */}
+                  {/* Persona response */}
                   <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--gold-dim)", color: "var(--gold)", fontFamily: "var(--font-serif, serif)", fontStyle: "italic", fontWeight: 700, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>NT</div>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--gold-dim)", color: "var(--gold)", fontFamily: "var(--font-serif, serif)", fontStyle: "italic", fontWeight: 700, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>AL</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 8 }}>
-                        <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontWeight: 700, fontSize: 12, color: "var(--text-1)" }}>Nikola Tesla</span>
+                        <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontWeight: 700, fontSize: 12, color: "var(--text-1)" }}>Ada Lovelace</span>
                         <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--text-3)" }}>23:00</span>
                       </div>
                       <p style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 11.5, color: "var(--text-2)", lineHeight: 1.7, margin: "0 0 8px" }}>
                         An excellent question. Allow me to address this with the precision it deserves.
                       </p>
                       <p style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 11.5, color: "var(--text-2)", lineHeight: 1.7, margin: "0 0 8px" }}>
-                        My work was always guided by one principle: that the forces of nature, properly understood and harnessed, could liberate humanity from drudgery. When I conceived the rotating magnetic field in 1882, walking through the City Park of Budapest, it came to me complete.
+                        I wrote that the Analytical Engine might act upon symbols beyond number. If we can encode relationships, a machine may follow rules that express music, language, or logic as readily as arithmetic.
                       </p>
                       <p style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 11.5, color: "var(--text-2)", lineHeight: 1.7, margin: "0 0 8px" }}>
-                        <strong style={{ color: "var(--text-1)" }}>The polyphase alternating current system</strong> was not merely an improvement upon Edison&apos;s direct current. It was a fundamentally different conception of how electrical energy should flow through civilization.
+                        <strong style={{ color: "var(--text-1)" }}>The key idea was generality.</strong> The same engine could follow many instruction patterns, opening a path toward what we now call programmable systems.
                       </p>
                       <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 6 }}>
                         <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--text-3)" }}>Sources (2)</span>
@@ -805,11 +921,11 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                 </div>
 
                 {/* Input bar */}
-                <div style={{ padding: "12px 20px", background: "#ffffff", borderTop: "1px solid #ebebeb", flexShrink: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#ffffff", border: "1.5px solid var(--gold)", borderRadius: 8, padding: "8px 8px 8px 14px", boxShadow: "0 0 0 3px var(--gold-dim)" }}>
-                    <span style={{ flex: 1, fontSize: 11, fontFamily: "var(--font-sans, sans-serif)", color: "var(--text-3)" }}>Ask a question grounded in historical record...</span>
+                <div style={{ padding: "12px 20px", background: "var(--bg)", borderTop: "1px solid var(--border-soft)", flexShrink: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg)", border: "1.5px solid var(--gold)", borderRadius: 8, padding: "8px 8px 8px 14px", boxShadow: "0 0 0 3px var(--gold-dim)" }}>
+                    <span style={{ flex: 1, fontSize: 11, fontFamily: "var(--font-sans, sans-serif)", color: "var(--text-3)" }}>Ask Ada Lovelace anything…</span>
                     <div style={{ width: 26, height: 26, borderRadius: 6, background: "var(--text-1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <ArrowUp size={12} style={{ color: "#fff" }} />
+                      <ArrowUp size={12} weight="Bold" color="var(--bg)" />
                     </div>
                   </div>
                 </div>
@@ -826,20 +942,28 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
               overflow: "hidden", pointerEvents: "auto", userSelect: "none",
               display: "flex", flexDirection: "column", background: "var(--bg)",
             }}>
-              {/* Header */}
-              <div style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "0 18px", height: 46, display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--gold-dim)", color: "var(--gold)", fontFamily: "var(--font-serif, serif)", fontStyle: "italic", fontWeight: 700, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>NT</div>
-                <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontWeight: 700, fontSize: 13, color: "var(--text-1)" }}>Nikola Tesla</span>
-                <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--text-3)", background: "rgba(255,255,255,0.06)", padding: "2px 7px", borderRadius: 20, letterSpacing: "0.04em" }}>Entity</span>
-                <div style={{ marginLeft: 12, display: "flex", gap: 2 }}>
-                  {["Overview", "Timeline", "Insights", "Resources", "Persona"].map((tab) => (
-                    <div key={tab} style={{
-                      padding: "4px 10px", borderRadius: 6, fontSize: 10, fontFamily: "var(--font-sans, sans-serif)", fontWeight: 500,
-                      color: tab === "Resources" ? "var(--gold)" : "var(--text-3)",
-                      background: tab === "Resources" ? "var(--gold-dim)" : "transparent",
-                      border: "1px solid transparent",
-                    }}>{tab}</div>
-                  ))}
+              {/* Header — mirrors profile page header */}
+              <div style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)", padding: "8px 14px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 7, border: "1px solid var(--border-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", background: "var(--bg)", flexShrink: 0 }}>
+                    <SquareAltArrowLeft size={12} weight="Linear" color="currentColor" />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 8.5, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 1 }}>Resources</span>
+                    <div style={{ fontFamily: "var(--font-sans, sans-serif)", fontWeight: 650, fontSize: 13, color: "var(--text-1)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.2 }}>Ada Lovelace</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 10, color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis" }}>AC Systems Research</span>
+                      <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: 9, color: "var(--text-3)", flexShrink: 0 }}>· Jan 12, 2026</span>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 7px", borderRadius: 7, border: "1px solid var(--border-soft)", color: "var(--text-3)", fontFamily: "var(--font-sans, sans-serif)", fontSize: 9, fontWeight: 500 }}>
+                    <ShareCircle size={10} weight="Linear" color="currentColor" /> Share
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 7px", borderRadius: 7, border: "1px solid var(--border-soft)", color: "var(--text-3)", fontFamily: "var(--font-sans, sans-serif)", fontSize: 9, fontWeight: 500 }}>
+                    <Export size={10} weight="Linear" color="currentColor" /> Export
+                  </div>
                 </div>
               </div>
 
@@ -848,24 +972,24 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                 {/* Icon-only sidebar */}
                 <div style={{ width: 52, background: "var(--bg)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", padding: "20px 0", flexShrink: 0 }}>
                   {[
-                    { Icon: BookOpen, key: "overview" },
-                    { Icon: Brain, key: "personality" },
-                    { Icon: GitBranch, key: "timeline" },
+                    { Icon: Widget,       key: "overview" },
+                    { Icon: UserId,       key: "personality" },
+                    { Icon: SortByTime,   key: "timeline" },
                   ].map(({ Icon, key }) => (
                     <div key={key} style={{ width: "100%", display: "flex", justifyContent: "center", padding: "1px 9px" }}>
                       <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Icon size={16} style={{ color: "var(--text-3)" }} />
+                        <Icon size={16} weight="Linear" color="var(--text-3)" />
                       </div>
                     </div>
                   ))}
                   <div style={{ height: 1, background: "var(--border-soft)", margin: "8px 10px" }} />
                   {[
-                    { Icon: AlertTriangle, key: "controversies" },
-                    { Icon: Newspaper, key: "news" },
+                    { Icon: Siren,         key: "news" },
+                    { Icon: Suitcase,      key: "work" },
                   ].map(({ Icon, key }) => (
                     <div key={key} style={{ width: "100%", display: "flex", justifyContent: "center", padding: "1px 9px" }}>
                       <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Icon size={16} style={{ color: "var(--text-3)" }} />
+                        <Icon size={16} weight="Linear" color="var(--text-3)" />
                       </div>
                     </div>
                   ))}
@@ -873,63 +997,70 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                   <div style={{ position: "relative", width: "100%", padding: "1px 9px" }}>
                     <div style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: 3, height: 22, background: "var(--gold)", borderRadius: "0 2px 2px 0" }} />
                     <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gold-dim)" }}>
-                      <BarChart2 size={16} style={{ color: "var(--gold)" }} />
+                      <Documents size={16} weight="Bold" color="var(--gold)" />
                     </div>
                   </div>
                   <div style={{ height: 1, background: "var(--border-soft)", margin: "8px 10px" }} />
                   <div style={{ width: "100%", padding: "1px 9px" }}>
                     <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <MessagesSquare size={16} style={{ color: "var(--text-3)" }} />
+                      <ChatLine size={16} weight="Linear" color="var(--text-3)" />
                     </div>
                   </div>
                   <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "0 9px" }}>
                     <div style={{ width: "100%", height: 34, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Settings size={16} style={{ color: "var(--text-3)" }} />
+                      <Settings size={16} weight="Linear" color="var(--text-3)" />
                     </div>
                     <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--surface-3, #2a2838)", border: "1px solid var(--border-soft)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <User size={15} style={{ color: "var(--text-2)" }} />
+                      <UserRounded size={15} weight="Linear" color="var(--text-2)" />
                     </div>
                   </div>
                 </div>
 
                 {/* Resources grid */}
-                <div style={{ flex: 1, overflow: "hidden", padding: "18px 20px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0 20px" }}>
+                <div style={{ flex: 1, overflow: "hidden", padding: "16px 20px" }}>
+                  <div style={{ marginBottom: 12, paddingBottom: 10, borderBottom: "1px solid var(--border-soft)" }}>
+                    <span style={{ fontSize: 9, color: "var(--gold)", fontFamily: "var(--font-mono, monospace)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 3 }}>Resources</span>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-1)", fontFamily: "var(--font-sans, sans-serif)", marginBottom: 2 }}>Source index</div>
+                    <div style={{ fontSize: 10, color: "var(--text-3)", fontFamily: "var(--font-sans, sans-serif)", lineHeight: 1.45 }}>Reference pages and media inputs used in this project.</div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0 20px" }}>
                   {[
                     {
-                      label: "BOOKS", Icon: BookOpen,
+                      label: "REFERENCE", Icon: BookBookmark,
                       items: [
-                        { title: "Tesla: Inventor of the Electrical Age", author: "W. Bernard Carlson", depth: 3 },
-                        { title: "Wizard: The Life and Times of Nikola Tesla", author: "Marc Seifer", depth: 3 },
-                        { title: "My Inventions: The Autobiography", author: "Nikola Tesla", depth: 2 },
-                        { title: "Empires of Light", author: "Jill Jonnes", depth: 2 },
+                        { title: "Ada Lovelace", author: "Wikipedia", depth: 3 },
+                        { title: "Q7259", author: "Wikidata", depth: 3 },
+                        { title: "Ada Lovelace", author: "Wikiquote", depth: 2 },
+                        { title: "Analytical Engine Notes", author: "Reference Archive", depth: 2 },
                       ],
                     },
                     {
-                      label: "MEDIA", Icon: Play,
+                      label: "MEDIA", Icon: DocumentText,
                       items: [
-                        { title: "Tesla: Master of Lightning", author: "PBS Documentary", depth: 2 },
-                        { title: "The Current War", author: "Alfonso Gomez-Rejon", depth: 1 },
-                        { title: "Drunk History: Tesla", author: "Comedy Central", depth: 1 },
-                        { title: "The Tesla Files", author: "History Channel", depth: 2 },
+                        { title: "The Enchantress of Numbers", author: "YouTube", depth: 2 },
+                        { title: "Computing Before Computers", author: "Video Source", depth: 1 },
+                        { title: "Analytical Engine Lectures", author: "Transcript", depth: 1 },
+                        { title: "Ada in Context", author: "Documentary", depth: 2 },
                       ],
                     },
                     {
-                      label: "PAPERS", Icon: FileText,
+                      label: "ARCHIVE", Icon: FileText,
                       items: [
-                        { title: "A New System of Alternate Current Motors", author: "Tesla, N. (1888)", depth: 3 },
-                        { title: "Experiments with Alternate Currents", author: "Tesla, N. (1892)", depth: 3 },
-                        { title: "The Problem of Increasing Human Energy", author: "Tesla, N. (1900)", depth: 2 },
-                        { title: "World System of Wireless Transmission", author: "Tesla, N. (1927)", depth: 2 },
+                        { title: "A New System of Alternate Current Motors", author: "Open Archive", depth: 3 },
+                        { title: "Experiments with Alternate Currents", author: "Primary Record", depth: 3 },
+                        { title: "The Problem of Increasing Human Energy", author: "Publication", depth: 2 },
+                        { title: "World System of Wireless Transmission", author: "Historical Journal", depth: 2 },
                       ],
                     },
                   ].map(({ label, Icon: ColIcon, items }) => (
                     <div key={label}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, borderBottom: "1px solid rgba(201,168,76,0.3)", paddingBottom: 8, marginBottom: 10 }}>
-                        <ColIcon size={13} style={{ color: "var(--gold)" }} />
+                        <ColIcon size={13} weight="Bold" color="var(--gold)" />
                         <span style={{ fontSize: 9, color: "var(--gold)", fontFamily: "var(--font-mono, monospace)", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
                       </div>
                       {items.map((item) => (
-                        <div key={item.title} style={{ padding: "8px 0", borderBottom: "1px solid var(--border-soft)" }}>
+                        <div key={`${item.title}-${item.author}`} style={{ padding: "8px 0", borderBottom: "1px solid var(--border-soft)" }}>
                           <div style={{ fontSize: 11, fontWeight: 500, color: "var(--text-1)", fontFamily: "var(--font-sans, sans-serif)", marginBottom: 2 }}>{item.title}</div>
                           <div style={{ fontSize: 10, color: "var(--text-2)", fontFamily: "var(--font-sans, sans-serif)", marginBottom: 5 }}>{item.author}</div>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -938,12 +1069,13 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
                                 <div key={d} style={{ width: 6, height: 6, borderRadius: "50%", background: d <= item.depth ? "var(--gold)" : "transparent", border: d <= item.depth ? "none" : "1px solid var(--border)" }} />
                               ))}
                             </div>
-                            <ExternalLink size={11} style={{ color: "var(--text-3)" }} />
+                            <ArrowRightUp size={11} weight="Linear" color="var(--text-3)" />
                           </div>
                         </div>
                       ))}
                     </div>
                   ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -956,6 +1088,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
       <hr className="section-divider" />
       {/* === 5. FEATURES BENTO === */}
       <section
+        id="features"
         className="landing-section section-tinted reveal"
         ref={addRevealRef}
       >
@@ -963,8 +1096,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           <p className="hex-eyebrow">Features</p>
           <h2 className="section-title mx-auto">
             <span
-              className="display-serif"
-              style={{ display: "block", fontWeight: 500, fontSize: "0.88em", letterSpacing: "-0.01em" }}
+              style={{ display: "block", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "0.88em", letterSpacing: "-0.01em" }}
             >
               Everything about a person &mdash;
             </span>
@@ -984,7 +1116,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
             <div style={{ flexShrink: 0, padding: "20px 20px 12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <MessagesSquare size={18} style={{ color: "var(--gold)" }} />
+                  <ChatLine size={18} weight="Bold" color="var(--gold)" />
                 </div>
                 <span style={{ fontFamily: "var(--font-sans, sans-serif)", fontSize: 17, fontWeight: 700, color: "var(--text-1)" }}>Persona Chat</span>
               </div>
@@ -1034,7 +1166,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           <div className="glass-card p-6 reveal reveal-d2" ref={addRevealRef} style={{ gridArea: "overview", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
               <div style={{ width: 34, height: 34, borderRadius: 9, background: "rgba(56,189,248,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <BookOpen size={17} style={{ color: "#38BDF8" }} />
+                <Widget size={17} weight="Bold" color="#38bdf8" />
               </div>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Overview</span>
             </div>
@@ -1047,7 +1179,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           <div className="glass-card p-6 reveal reveal-d3" ref={addRevealRef} style={{ gridArea: "personality", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
               <div style={{ width: 34, height: 34, borderRadius: 9, background: "rgba(167,139,250,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Brain size={17} style={{ color: "#A78BFA" }} />
+                <UserId size={17} weight="Bold" color="#a78bfa" />
               </div>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Personality</span>
             </div>
@@ -1060,7 +1192,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           <div className="glass-card p-5 reveal reveal-d4" ref={addRevealRef} style={{ gridArea: "timeline", overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(52,211,153,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <GitBranch size={16} style={{ color: "#34D399" }} />
+                <SortByTime size={16} weight="Bold" color="#34d399" />
               </div>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Timeline</span>
             </div>
@@ -1078,20 +1210,48 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
             </div>
           </div>
 
-          {/* Controversies */}
-          <div className="glass-card p-5 reveal reveal-d5" ref={addRevealRef} style={{ gridArea: "controversies", overflow: "hidden" }}>
+          {/* Retrieval Modes */}
+          <div className="glass-card p-5 reveal reveal-d5" ref={addRevealRef} style={{ gridArea: "modes", overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(248,113,113,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <AlertTriangle size={16} style={{ color: "#F87171" }} />
+              <div style={{ width: 34, height: 34, borderRadius: 9, background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Database size={16} weight="Bold" color="var(--gold)" />
               </div>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Controversies</span>
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: 14.5, fontWeight: 700, color: "var(--text-1)" }}>Retrieval Modes</span>
             </div>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-2)", lineHeight: 1.6, margin: "0 0 10px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-              Balanced coverage of disputes and contested claims. Myth vs verified fact with source references.
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-2)", lineHeight: 1.6, margin: "0 0 11px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              In Persona Chat, choose web context, knowledge base grounding, or combine both.
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-              <div style={{ padding: "6px 10px", borderRadius: 6, background: "rgba(248,113,113,0.08)", fontFamily: "var(--font-mono)", fontSize: 9, color: "#F87171", textAlign: "center" }}>CLAIM</div>
-              <div style={{ padding: "6px 10px", borderRadius: 6, background: "rgba(52,211,153,0.08)", fontFamily: "var(--font-mono)", fontSize: 9, color: "#34D399", textAlign: "center" }}>VERDICT</div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 9, padding: "9px 10px", background: "var(--control-bg)", borderRadius: 8, border: "1px solid var(--border-soft)" }}>
+                <div style={{ width: 22, height: 22, borderRadius: 7, background: "rgba(56,189,248,0.16)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Magnifier size={12} weight="Bold" color="#38bdf8" />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 2 }}>
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 650, color: "var(--text-1)", margin: 0 }}>Web Search</p>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "#38bdf8", textTransform: "uppercase", letterSpacing: "0.08em" }}>live</span>
+                  </div>
+                  <p style={{ fontFamily: "var(--font-sans)", fontSize: 9.5, color: "var(--text-3)", lineHeight: 1.45, margin: 0 }}>Fresh context from current web sources.</p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 9, padding: "9px 10px", background: "var(--control-bg)", borderRadius: 8, border: "1px solid var(--border-soft)" }}>
+                <div style={{ width: 22, height: 22, borderRadius: 7, background: "rgba(52,211,153,0.16)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Database size={12} weight="Bold" color="#34d399" />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 2 }}>
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 650, color: "var(--text-1)", margin: 0 }}>Knowledge Base</p>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "#34d399", textTransform: "uppercase", letterSpacing: "0.08em" }}>grounded</span>
+                  </div>
+                  <p style={{ fontFamily: "var(--font-sans)", fontSize: 9.5, color: "var(--text-3)", lineHeight: 1.45, margin: 0 }}>Retrieval from indexed project intelligence.</p>
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid var(--border-soft)", paddingTop: 8 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-3)", margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>Hybrid: both modes enabled</p>
+              </div>
             </div>
           </div>
 
@@ -1099,7 +1259,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           <div className="glass-card p-5 reveal reveal-d6" ref={addRevealRef} style={{ gridArea: "news", overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(251,146,60,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Newspaper size={16} style={{ color: "#FB923C" }} />
+                <Siren size={16} weight="Bold" color="#fb923c" />
               </div>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>News</span>
             </div>
@@ -1108,11 +1268,11 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {[
-                { tag: "BBC", time: "2h ago", title: "Tesla's AC legacy powers the modern grid" },
-                { tag: "Wired", time: "5h ago", title: "Why Nikola Tesla's ideas still matter in 2026" },
+                { tag: "BBC", time: "2h ago", title: "Ada Lovelace's ideas continue to shape modern computing" },
+                { tag: "Wired", time: "5h ago", title: "Why Ada Lovelace still matters in 2026" },
               ].map(({ tag, time, title }) => (
                 <div key={title} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 9px", background: "var(--control-bg)", borderRadius: 7 }}>
-                  <Newspaper size={12} style={{ color: "#FB923C", flexShrink: 0, marginTop: 2 }} />
+                  <Link size={12} weight="Bold" color="#fb923c" style={{ flexShrink: 0, marginTop: 2 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontFamily: "var(--font-sans)", fontSize: 10.5, color: "var(--text-1)", margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</p>
                     <div style={{ display: "flex", gap: 8 }}>
@@ -1129,7 +1289,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           <div className="glass-card p-5 reveal reveal-d7" ref={addRevealRef} style={{ gridArea: "resources", overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(244,114,182,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <BarChart2 size={16} style={{ color: "#F472B6" }} />
+                <Documents size={16} weight="Bold" color="#f472b6" />
               </div>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Resources</span>
             </div>
@@ -1138,11 +1298,11 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {[
-                { Icon: BookOpen, title: "Tesla: Inventor of the Electrical Age", sub: "W. Bernard Carlson", depth: 3 },
-                { Icon: FileText, title: "A New System of Alternate Current Motors", sub: "Tesla, N. (1888)", depth: 3 },
-              ].map(({ Icon, title, sub, depth }) => (
+                { Icon: DocumentText, color: "#f472b6", title: "Ada's Algorithm", sub: "James Essinger", depth: 3 },
+                { Icon: FileText, color: "#f472b6", title: "Notes on the Analytical Engine", sub: "Lovelace, A. (1843)", depth: 3 },
+              ].map(({ Icon, color, title, sub, depth }) => (
                 <div key={title} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 9px", background: "var(--control-bg)", borderRadius: 7 }}>
-                  <Icon size={12} style={{ color: "var(--gold)", flexShrink: 0, marginTop: 2 }} />
+                  <Icon size={12} weight="Bold" color={color} style={{ flexShrink: 0, marginTop: 2 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontFamily: "var(--font-sans)", fontSize: 10.5, color: "var(--text-1)", margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</p>
                     <p style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-3)", margin: 0 }}>{sub}</p>
@@ -1160,125 +1320,80 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
         </div>
       </section>
 
-      {/* ═══════ 6. TESTIMONIALS — commented out ═══════
+      {/* ═══════ 6. USE CASES ═══════ */}
       <hr className="section-divider" />
       <section
         id="use-cases"
-        className="py-24 px-6 reveal section-ink"
-        ref={addRevealRef}
-      >
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div className="text-center mb-14">
-            <p className="hex-eyebrow">Testimonials</p>
-            <h2 className="section-title">
-              <span
-                className="display-serif"
-                style={{ display: "block", fontWeight: 500, fontSize: "0.88em", letterSpacing: "-0.01em" }}
-              >
-                What researchers are
-              </span>
-              <span className="gradient-text">saying</span>
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <div
-                key={t.name}
-                className={`testimonial-card reveal reveal-d${i + 1}`}
-                ref={addRevealRef}
-              >
-                <span className="testimonial-quote-mark">&ldquo;</span>
-                <p className="testimonial-text">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div className="flex items-center gap-3 mt-auto">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-sans text-sm font-bold shrink-0"
-                    style={{
-                      background: "var(--text-1)",
-                      color: "#fff",
-                    }}
-                  >
-                    {t.name.split(" ").map(n => n[0]).join("")}
-                  </div>
-                  <div>
-                    <div className="font-sans text-sm font-semibold" style={{ color: "var(--text-1)" }}>{t.name}</div>
-                    <div className="font-mono text-[11px]" style={{ color: "var(--text-3)" }}>{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      ═══════ end TESTIMONIALS ═══════ */}
-
-      {/* ═══════ 7. PRICING — commented out ═══════
-      <hr className="section-divider" />
-      <section
-        id="pricing"
-        className="landing-section reveal"
+        className="landing-section section-cool reveal"
         ref={addRevealRef}
       >
         <div className="text-center mb-14">
-          <p className="hex-eyebrow">Pricing</p>
-          <h2 className="section-title">
+          <p className="hex-eyebrow">Use Cases</p>
+          <h2 className="section-title mx-auto">
             <span
-              className="display-serif"
-              style={{ display: "block", fontWeight: 500, fontSize: "0.88em", letterSpacing: "-0.01em" }}
+              style={{ display: "block", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "0.88em", letterSpacing: "-0.01em" }}
             >
-              Simple, transparent
+              Different teams,
             </span>
-            <span className="gradient-text">pricing</span>
+            <span className="gradient-text">one research engine</span>
           </h2>
         </div>
-        <div className="grid md:grid-cols-3 gap-6" style={{ maxWidth: 1000, margin: "0 auto" }}>
-          {PRICING_PLANS.map((plan, i) => (
-            <div
-              key={plan.name}
-              className={`glass-card p-8 flex flex-col reveal reveal-d${i + 1} ${plan.featured ? "pricing-featured md:scale-[1.03]" : ""}`}
-              ref={addRevealRef}
-            >
-              {plan.featured && (
-                <span
-                  className="font-mono text-[10px] uppercase tracking-[0.12em] px-3 py-1 rounded-full self-start mb-4"
-                  style={{ background: "var(--gold-dim)", color: "var(--gold)" }}
-                >
-                  Most Popular
-                </span>
-              )}
-              <h3 className="font-sans text-xl font-bold mb-1" style={{ color: "var(--text-1)" }}>
-                {plan.name}
-              </h3>
-              <div className="font-sans text-3xl font-bold mb-2 gradient-text">
-                {plan.price}
-              </div>
-              <p className="font-sans card-body-text mb-6" style={{ color: "var(--text-2)" }}>
-                {plan.desc}
-              </p>
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "var(--text-2)" }}>
-                    <Check size={15} className="shrink-0 mt-0.5" style={{ color: "var(--gold)" }} />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={onGetStarted}
-                className={`btn w-full ${plan.featured ? "btn-primary" : "btn-secondary"}`}
+
+        <div className="grid md:grid-cols-3 gap-5">
+          {USE_CASES.map((useCase, index) => {
+            const Icon = useCase.icon
+            const testimonial = TESTIMONIALS[index]
+            return (
+              <article
+                key={useCase.title}
+                className={`glass-card p-6 reveal reveal-d${index + 1}`}
+                ref={addRevealRef}
+                style={{ minHeight: 270 }}
               >
-                {plan.cta}
-              </button>
-            </div>
-          ))}
+                <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    background: "var(--gold-dim)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 12,
+                  }}
+                >
+                  <Icon size={17} weight="Bold" color="var(--gold)" />
+                </div>
+
+                <h3 style={{ fontSize: 20, lineHeight: 1.1, letterSpacing: "-0.02em", color: "var(--text-1)", fontWeight: 700, marginBottom: 10 }}>
+                  {useCase.title}
+                </h3>
+
+                <p style={{ color: "var(--text-2)", fontSize: 13, lineHeight: 1.7, marginBottom: 14 }}>
+                  {useCase.summary}
+                </p>
+
+                <ul style={{ paddingLeft: 18, color: "var(--text-2)", fontSize: 12, lineHeight: 1.75, display: "grid", gap: 4, marginBottom: 14 }}>
+                  {useCase.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+
+                {testimonial ? (
+                  <p style={{ marginTop: "auto", color: "var(--text-3)", fontSize: 11, lineHeight: 1.65 }}>
+                    "{testimonial.quote}" — {testimonial.name}
+                  </p>
+                ) : null}
+              </article>
+            )
+          })}
         </div>
       </section>
-      ═══════ end PRICING ═══════ */}
 
       {/* ═══════ 8. FAQ ═══════ */}
       <hr className="section-divider" />
       <section
+        id="faq"
         className="py-24 px-6 reveal section-warm"
         ref={addRevealRef}
       >
@@ -1287,8 +1402,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
             <p className="hex-eyebrow">FAQ</p>
             <h2 className="section-title">
               <span
-                className="display-serif"
-                style={{ display: "block", fontWeight: 500, fontSize: "0.88em", letterSpacing: "-0.01em" }}
+                style={{ display: "block", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: "0.88em", letterSpacing: "-0.01em" }}
               >
                 Questions &amp;
               </span>
@@ -1336,7 +1450,7 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
           >
             Start with a name.
             <br />
-            <span className="display-serif gradient-text" style={{ fontWeight: 500 }}>
+            <span className="gradient-text" style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontStyle: "normal" }}>
               Discover a mind.
             </span>
           </h2>
@@ -1349,16 +1463,17 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
               onClick={onGetStarted}
               className="btn btn-primary flex items-center gap-2 px-8 py-3.5"
               style={{ fontSize: 15, borderRadius: 8 }}
+              disabled={isAuthPending}
             >
-              Get started for free
-              <ArrowRight size={16} />
+              {authCtaLabel}
+              <ArrowRight size={16} weight="Bold" />
             </button>
             <a
-              href="#how-it-works"
+              href="/how-it-works"
               className="btn btn-secondary px-7 py-3.5"
               style={{ fontSize: 15, borderRadius: 8 }}
             >
-              See how it works
+              Read docs
             </a>
           </div>
           <p className="text-[10px] mt-6" style={{ color: "var(--text-3)", letterSpacing: "0.15em", fontFamily: "var(--font-data), monospace", textTransform: "uppercase" }}>
@@ -1369,56 +1484,173 @@ export function LandingPage({ onGetStarted }: Readonly<LandingPageProps>) {
 
       {/* ═══════ 10. FOOTER ═══════ */}
       <footer
-        className="py-16 px-6"
+        className="px-6"
         style={{
-          background: "#19172E",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+          position: "relative",
+          overflow: "hidden",
+          background:
+            "radial-gradient(110% 95% at 50% -8%, var(--ambient-accent) 0%, transparent 62%), linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%)",
+          borderTop: "1px solid var(--border)",
         }}
       >
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12">
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-lg font-semibold" style={{ color: "#EEECEA" }}>
-                Mimic
-              </span>
-              <span className="text-lg font-semibold" style={{ color: "#A78BFA" }}>
-                AI
-              </span>
-            </div>
-            <p className="font-sans text-sm" style={{ color: "rgba(238,236,234,0.50)" }}>
-              Intelligence profiles grounded in research.
-            </p>
-          </div>
-          <div>
-            <h4 className="footer-eyebrow mb-4">Product</h4>
-            <div className="space-y-2.5 font-sans text-sm">
-              <a href="#how-it-works" className="footer-link">How It Works</a>
-              <a href="#profile-preview" className="footer-link">Personas</a>
-              <a href="#pricing" className="footer-link">Pricing</a>
-            </div>
-          </div>
-          <div>
-            <h4 className="footer-eyebrow mb-4">Resources</h4>
-            <div className="space-y-2.5 font-sans text-sm">
-              <button type="button" className="footer-link">Documentation</button>
-              <button type="button" className="footer-link">API</button>
-              <button type="button" className="footer-link">Blog</button>
-            </div>
-          </div>
-          <div>
-            <h4 className="footer-eyebrow mb-4">Connect</h4>
-            <div className="space-y-2.5 font-sans text-sm">
-              <button type="button" className="footer-link">Twitter</button>
-              <button type="button" className="footer-link">LinkedIn</button>
-              <button type="button" className="footer-link">GitHub</button>
-            </div>
-          </div>
-        </div>
         <div
-          className="max-w-5xl mx-auto mt-12 pt-8 text-xs"
-          style={{ color: "rgba(238,236,234,0.35)", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "var(--font-data), monospace" }}
-        >
-          © {new Date().getFullYear()} Mimic AI. All rights reserved.
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background: "radial-gradient(95% 120% at 50% 0%, var(--gold-glow) 0%, transparent 66%)",
+            opacity: 0.9,
+          }}
+        />
+        <div className="max-w-6xl mx-auto" style={{ position: "relative", zIndex: 1, paddingTop: 66, paddingBottom: 24 }}>
+          <div className="grid md:grid-cols-[1.45fr_1fr] gap-14 items-start" style={{ marginBottom: 54 }}>
+            <div>
+              <p
+                style={{
+                  fontFamily: "var(--font-mono, monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: "var(--text-3)",
+                  marginBottom: 14,
+                }}
+              >
+                Experience lift-off
+              </p>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-end",
+                  gap: 18,
+                  marginBottom: 12,
+                  flexWrap: "wrap",
+                }}
+              >
+                <svg
+                  viewBox="0 0 280 240"
+                  aria-label="Mimic logo"
+                  style={{
+                    width: "clamp(74px, 10vw, 118px)",
+                    height: "auto",
+                    display: "block",
+                    flexShrink: 0,
+                  }}
+                >
+                  <path
+                    d="M 20 180 L 20 60 A 40 40 0 0 1 100 60 L 100 120 A 40 40 0 0 0 180 120 L 180 60 A 40 40 0 0 1 260 60 L 260 180"
+                    stroke="var(--text-1)"
+                    strokeWidth="40"
+                    strokeLinecap="butt"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                </svg>
+
+                <h2
+                  style={{
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    fontWeight: 800,
+                    letterSpacing: "-0.055em",
+                    lineHeight: 0.9,
+                    margin: 0,
+                    color: "var(--text-1)",
+                    fontSize: "clamp(4rem, 12vw, 10.8rem)",
+                  }}
+                >
+                  MIMIC
+                </h2>
+              </div>
+
+              <p
+                className="font-sans"
+                style={{
+                  maxWidth: 540,
+                  fontSize: 15,
+                  lineHeight: 1.75,
+                  color: "var(--text-2)",
+                }}
+              >
+                Intelligence profiles grounded in research, shaped by multi-agent verification, and designed for deep exploration.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-10">
+              <div>
+                <h4
+                  style={{
+                    fontFamily: "var(--font-mono, monospace)",
+                    fontSize: 10,
+                    letterSpacing: "0.13em",
+                    textTransform: "uppercase",
+                    color: "var(--text-3)",
+                    marginBottom: 14,
+                  }}
+                >
+                  Product
+                </h4>
+                <div className="space-y-3 font-sans text-sm">
+                  <a href="/how-it-works" className="footer-link">How It Works</a>
+                  <a href="#features" className="footer-link">Features</a>
+                  <a href="#profile-preview" className="footer-link">Personas</a>
+                  <a href="#faq" className="footer-link">FAQ</a>
+                </div>
+              </div>
+
+              <div>
+                <h4
+                  style={{
+                    fontFamily: "var(--font-mono, monospace)",
+                    fontSize: 10,
+                    letterSpacing: "0.13em",
+                    textTransform: "uppercase",
+                    color: "var(--text-3)",
+                    marginBottom: 14,
+                  }}
+                >
+                  Company
+                </h4>
+                <div className="space-y-3 font-sans text-sm">
+                  <a href="#use-cases" className="footer-link">Use Cases</a>
+                  <a href="#faq" className="footer-link">FAQ</a>
+                  <a href="/how-it-works" className="footer-link">Docs</a>
+                  <a href="/how-it-works#notes-and-limitations" className="footer-link">Method notes</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              borderTop: "1px solid var(--border)",
+              paddingTop: 16,
+              display: "flex",
+              gap: 14,
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              style={{
+                color: "var(--text-3)",
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: 11,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              © {new Date().getFullYear()} Mimic AI
+            </div>
+
+            <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+              <a href="/how-it-works#notes-and-limitations" className="footer-link" style={{ fontSize: 12 }}>Privacy</a>
+              <a href="/how-it-works#notes-and-limitations" className="footer-link" style={{ fontSize: 12 }}>Terms</a>
+              <button onClick={onGetStarted} type="button" className="footer-link" style={{ fontSize: 12 }}>
+                {isSignedIn ? "Dashboard" : "Google Login"}
+              </button>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

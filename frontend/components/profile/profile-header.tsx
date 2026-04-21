@@ -1,6 +1,6 @@
 "use client"
 
-import { RefreshCw, Layers, Share2, ExternalLink, ArrowLeft } from "lucide-react"
+import { CheckCircle, Export, Refresh, ShareCircle, SquareAltArrowLeft } from "@/components/ui/solar-icons"
 
 interface ProfileHeaderProps {
   projectContext?: {
@@ -15,24 +15,27 @@ interface ProfileHeaderProps {
     tags: string[]
     subtitle: string
     eyebrow: string
+    imageUrl?: string
   }
   activeTab: string
   onTabChange: (tab: string) => void
   onBackToProjects?: () => void
+  onExportClick?: () => void
+  exportState?: "idle" | "loading" | "success"
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase()
-}
-
-export function ProfileHeader({ profile, activeTab, onTabChange, projectContext, onBackToProjects }: ProfileHeaderProps) {
+export function ProfileHeader({
+  profile,
+  activeTab,
+  onTabChange,
+  projectContext,
+  onBackToProjects,
+  onExportClick,
+  exportState = "idle",
+}: Readonly<ProfileHeaderProps>) {
   const displayName = projectContext ? projectContext.targetName : profile.name
-  const initials = getInitials(displayName)
+  const exportLabel = exportState === "loading" ? "Exporting..." : exportState === "success" ? "Exported" : "Export"
+  const ExportIcon = exportState === "loading" ? Refresh : exportState === "success" ? CheckCircle : Export
 
   return (
     <div
@@ -55,7 +58,7 @@ export function ProfileHeader({ profile, activeTab, onTabChange, projectContext,
               style={{
                 width: 32,
                 height: 32,
-                background: "var(--surface-2)",
+                background: "var(--bg)",
                 border: "1px solid var(--border-soft)",
                 color: "var(--text-3)",
                 cursor: "pointer",
@@ -66,28 +69,13 @@ export function ProfileHeader({ profile, activeTab, onTabChange, projectContext,
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = "var(--text-3)"
-                e.currentTarget.style.background = "var(--surface-2)"
+                e.currentTarget.style.background = "var(--bg)"
               }}
               title="Return to Projects"
             >
-              <ArrowLeft size={16} />
+              <SquareAltArrowLeft size={16} weight="Linear" color="currentColor" />
             </button>
           )}
-
-          <div
-            className="flex items-center justify-center rounded-full font-serif shrink-0"
-            style={{
-              width: 44,
-              height: 44,
-              background: "var(--gold-dim)",
-              color: "var(--gold)",
-              fontSize: 16,
-              fontStyle: "italic",
-              fontWeight: 600,
-            }}
-          >
-            {initials}
-          </div>
 
           <div className="min-w-0 flex-1">
             <span
@@ -104,12 +92,11 @@ export function ProfileHeader({ profile, activeTab, onTabChange, projectContext,
               {profile.eyebrow}
             </span>
             <h1
-              className="font-serif"
               style={{
+                fontFamily: "'Tchig mono', monospace",
                 fontSize: 24,
                 fontWeight: 600,
-                fontStyle: "italic",
-                color: "var(--ivory)",
+                color: "var(--text-1)",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
               }}
@@ -139,16 +126,26 @@ export function ProfileHeader({ profile, activeTab, onTabChange, projectContext,
 
         {/* Right — Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          {[
-            { icon: RefreshCw, label: "Regenerate" },
-            { icon: Layers, label: "Compare" },
-            { icon: Share2, label: "Share" },
-            { icon: ExternalLink, label: "Export" },
-          ].map(({ icon: Icon, label }) => (
-            <button key={label} className="btn btn-ghost flex items-center gap-2 py-2 px-4 text-sm font-medium">
-              <Icon size={14} /> {label}
-            </button>
-          ))}
+          <button className="btn-dashboard-action" type="button">
+            <ShareCircle size={14} weight="Linear" /> Share
+          </button>
+          <button
+            className="btn-dashboard-action export-action-btn"
+            onClick={onExportClick}
+            type="button"
+            disabled={exportState === "loading"}
+            style={{
+              opacity: exportState === "loading" ? 0.82 : 1,
+              cursor: exportState === "loading" ? "wait" : "pointer",
+            }}
+          >
+            <ExportIcon
+              size={14}
+              weight={exportState === "success" ? "Bold" : "Linear"}
+              className={exportState === "loading" ? "animate-spin" : undefined}
+            />{" "}
+            {exportLabel}
+          </button>
         </div>
       </div>
     </div>
